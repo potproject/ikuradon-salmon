@@ -1,0 +1,229 @@
+openapi: 3.0.0
+info:
+  title: 'ikuradon-salmon'
+  description: 'Ikuradon Push Server Rest API'
+  version: 1.0.0
+paths:
+  /health-check:
+    get:
+      summary: 'Health Check'
+      responses:
+        '200':
+          description: Response
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: boolean
+                    description: 'always `true`.'
+                    example: true
+                  data:
+                    properties:
+                      name:
+                        type: string
+                        description: 'APP Name'
+                        example: 'ikuradon-salmon'
+                      version:
+                        type: string
+                        description: 'App Version'
+                        example: '1.0.0'
+  /api/v1/id:
+    get:
+      summary: ''
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Response
+          content:            
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: boolean
+                    description: 'always `true`.'
+                    example: true
+                  data:
+                    properties:
+                      subscribe_id:
+                        type: string
+                        description: '64 characters'
+                        example: 'PbnWzSoSP1WBPXYbBsFgZWAj3lmZ23Ljr6i6b9HVIQZiTIthZqKsDbArEPnkJQOk'
+                      user_id:
+                        type: string
+                        description: 'Mastodon User ID'
+                        example: '1000'
+                      username:
+                        type: string
+                        description: 'Mastodon User Name'
+                        example: 'username'
+                      domain:
+                        type: string
+                        description: 'Mastodon Domain'
+                        example: 'mastodon.social'      
+                      access_token:
+                        type: string
+                        description: 'Mastodon Access Token'
+                        example: '1OWbZghxxgcFtHwv9Mc4yRlj9U2N5iD3'
+                      exponent_push_token:
+                        type: string
+                        description: 'Expo Push Token'
+                        example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxx]'
+                      created_at:
+                        type: number
+                        description: 'Created UNIXTIME'
+                        example: 1591636409
+                      expired_at:
+                        type: number
+                        description: 'Expired UNIXTIME'
+                        example: 1591639409
+                      last_updated_at:
+                        type: number
+                        description: 'Last Updated UNIXTIME'
+                        example: 1591636409
+                      server_last_id:
+                        type: number
+                        description: 'Server Timeline last_id'
+                        example: 1234
+                      notifications_count:
+                        type: number
+                        description: 'Push Count'
+                        example: 0
+        '401':
+          description: 'Unauthorized - invailed subscribe_id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+        '404':
+          description: 'NotFound - Not subscibed ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+  /api/v1/subscribe:
+    post:
+      summary: 'Subscribe to push notifications.'
+      parameters:
+        -
+          name: domain
+          in: query
+          description: 'Mastodon Server Domain'
+          required: true
+          schema:
+            type: string
+          example: 'mastodon.social'
+        -
+          name: access_token
+          in: query
+          description: 'Mastodon AccessToken'
+          required: true
+          schema:
+            type: string
+          example: 'MastodonAccessTokenStrings'
+        -
+          name: exponent_push_token
+          in: query
+          description: 'ExponentPushToken'
+          required: true
+          schema:
+            type: string
+          example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxx]'
+      responses:
+        '200':
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result_response_body'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+        '503':
+          description: 'Dest Server Unavailable'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+  /api/v1/unsubscribe:
+    post:
+      summary: 'UnSubscribe to push notifications.'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Response
+          content:            
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result_response_body'
+        '401':
+          description: 'Unauthorized - invailed subscribe_id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+        '404':
+          description: 'NotFound - Not subscibed ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_response_body'
+components:
+  schemas:
+    error_response_body:
+      properties:
+        result:
+          description: 'Always `false`.'
+          type: boolean
+          example: false
+        errors:
+          properties:
+            code:
+              description: 'Error Code'
+              type: string
+            message:
+              description: 'Error Message'
+              type: string
+          type: object
+      type: object
+    result_response_body:
+      properties:
+        result:
+          type: boolean
+          example: true
+        data:
+          properties:
+            subscribe_id:
+              type: string
+              nullable: true
+              description: '64 characters'
+              example: 'PbnWzSoSP1WBPXYbBsFgZWAj3lmZ23Ljr6i6b9HVIQZiTIthZqKsDbArEPnkJQOk'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "Use subscribe_id"
+    

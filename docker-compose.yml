@@ -1,0 +1,29 @@
+version: '3'
+services:
+  api:
+    build: .
+    restart: always
+    env_file: .env
+    networks:
+      - external_network
+      - internal_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --proxy=off localhost:8080/health-check || exit 1"]
+    ports:
+      - "8080:8080"
+#    depends_on:
+#      - redis
+#  redis:
+#    restart: always
+#    image: redis:6.0-alpine
+#    networks:
+#      - internal_network
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#    volumes:
+#      - ./data/redis:/data
+
+networks:
+  external_network:
+  internal_network:
+    internal: true
