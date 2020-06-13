@@ -30,6 +30,11 @@ func PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoi
 	values.Set("subscription[endpoint]", subscriptionEndpoint)
 	values.Add("subscription[keys][p256dh]", subscriptionKeysP256dh)
 	values.Add("subscription[keys][auth]", subscriptionKeysAuth)
+	values.Add("data[alerts][follow]", "true")
+	values.Add("data[alerts][favourite]", "true")
+	values.Add("data[alerts][reblog]", "true")
+	values.Add("data[alerts][mention]", "true")
+	values.Add("data[alerts][poll]", "true")
 	req, _ := http.NewRequest("POST", endpoints, strings.NewReader(values.Encode()))
 
 	req.Header.Set("Accept", "application/json")
