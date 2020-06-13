@@ -77,7 +77,6 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
 		return
 	}
-	fmt.Printf("%+v/r/n", rps)
 
 	// データ登録
 	now := time.Now().Unix()
@@ -91,6 +90,7 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		PushPrivateKey:     privateKey,
 		PushPublicKey:      publicKey,
 		PushAuth:           auth,
+		ServerKey:          rps.ServerKey,
 		CreatedAt:          now,
 		ExpiredAt:          0,
 		LastUpdatedAt:      now,
