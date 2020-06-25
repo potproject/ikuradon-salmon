@@ -87,7 +87,7 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 }
 
 func d(text string) []byte {
-	b, err := base64.StdEncoding.DecodeString(text)
+	b, err := base64.RawURLEncoding.DecodeString(text)
 	if err != nil {
 		panic(err)
 	}
