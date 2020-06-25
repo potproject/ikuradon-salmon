@@ -49,6 +49,7 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("C-E        :", headerContentEncoding) // "aesgcm"
 	fmt.Println("ttl        :", headerTtl)             // 172800
 	fmt.Println("c-t        :", headerContentType)     // application/octet-stream
+	fmt.Println("Encryption :", headerEncryption)      //
 	fmt.Println("salt       :", salt)                  // EhJrnT2cqiZXXXXXX
 	fmt.Println("dh         :", dh)                    // BCC42wgRWCcMIquAAyegXXXXXXXXXXXAhzIc61XXXXXXXXXPL5r2Ndh9RRGYvpaH2_BU
 	fmt.Println("p256ecdsa  :", p256ecdsa)             // BPf7TFNX-XXXXXX_XXXXXXX-pyAI8sJyYYt62Dus0Mxpy8OF9kbG5gIxxxxxxXXkwsKvcnTA
