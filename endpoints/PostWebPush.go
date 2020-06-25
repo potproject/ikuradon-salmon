@@ -71,7 +71,7 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plaintext, err := ece.Decrypt(d(b),
+	plaintext, err := ece.Decrypt(b,
 		ece.WithEncoding(ece.AESGCM),
 		ece.WithSalt(du(salt)),
 		ece.WithAuthSecret(d(ds.PushAuth)),
