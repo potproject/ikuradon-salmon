@@ -71,12 +71,12 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plaintext, err := ece.Decrypt(b,
+	plaintext, err := ece.Decrypt(d(b),
 		ece.WithEncoding(ece.AESGCM),
-		ece.WithSalt(d(salt)),
+		ece.WithSalt(du(salt)),
 		ece.WithAuthSecret(d(ds.PushAuth)),
 		ece.WithPrivate(d(ds.PushPrivateKey)),
-		ece.WithDh(d(dh)),
+		ece.WithDh(du(dh)),
 	)
 	if err != nil {
 		fmt.Println("error Decrypt.", err.Error())
@@ -87,6 +87,14 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 }
 
 func d(text string) []byte {
+	b, err := base64.StdEncoding.DecodeString(text)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func du(text string) []byte {
 	b, err := base64.RawURLEncoding.DecodeString(text)
 	if err != nil {
 		panic(err)
