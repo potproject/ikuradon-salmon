@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -43,7 +44,7 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SubscribeId, err := password.Generate(24, 10, 0, false, true)
+	subscribeID, err := password.Generate(24, 10, 0, false, true)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -55,15 +56,18 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
 		return
 	}
-	auth := base64.StdEncoding.EncodeToString([]byte(SubscribeId))
-	fmt.Println(auth)
+	// AuthSecret = Base64 encoded string of 16 bytes of random data.
+	authSecret := make([]byte, 16)
+	rand.Read(authSecret)
+	auth := base64.StdEncoding.EncodeToString([]byte(authSecret))
+
 	// Web Push APIに登録
 	// VAPID Keyを生成
 	privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
 
-	endpoints := setting.S.BaseURL + "api/v1/webpush"
+	endpoints := setting.S.BaseURL + "api/v1/webpush/" + subscribeID
 	if setting.S.BaseURL == "" {
-		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush", setting.S.ApiHost, setting.S.ApiPort)
+		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush/%s", setting.S.ApiHost, setting.S.ApiPort, subscribeID)
 	}
 
 	rps, err := network.PushSubscribeMastodon(
@@ -80,8 +84,8 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 
 	// データ登録
 	now := time.Now().Unix()
-	err = dataAccess.DA.Set(SubscribeId, dataAccess.DataSet{
-		SubscribeId:        SubscribeId,
+	err = dataAccess.DA.Set(subscribeID, dataAccess.DataSet{
+		SubscribeId:        subscribeID,
 		UserID:             id,
 		Username:           username,
 		Domain:             req.Domain,
@@ -107,7 +111,7 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 	res, _ := json.Marshal(SubscribeResponse{
 		Result: true,
 		Data: SubscribeResponseData{
-			SubscribeId: SubscribeId,
+			SubscribeId: subscribeID,
 		},
 	})
 	w.Write(res)

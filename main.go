@@ -44,12 +44,12 @@ func main() {
 	router.HandleFunc("/api/v1/id", endpoints.GetId).Methods("GET")
 	router.HandleFunc("/api/v1/subscribe", endpoints.PostSubscribe).Methods("POST")
 	router.HandleFunc("/api/v1/unsubscribe", endpoints.PostUnsubscribe).Methods("POST")
-	router.HandleFunc("/api/v1/webpush", endpoints.PostWebPush).Methods("POST")
+	router.HandleFunc("/api/v1/webpush/{subscribeID}", endpoints.PostWebPush).Methods("POST")
 	domain := fmt.Sprintf("%s:%d", setting.S.ApiHost, setting.S.ApiPort)
-	realUrl := "http://" + domain + "/"
+	realURL := "http://" + domain + "/"
 	if setting.S.BaseURL != "" {
-		realUrl = setting.S.BaseURL
+		realURL = setting.S.BaseURL
 	}
-	fmt.Println("Running to " + realUrl)
+	fmt.Println("Running to " + realURL)
 	log.Fatal(http.ListenAndServe(domain, router))
 }
