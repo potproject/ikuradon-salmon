@@ -24,7 +24,6 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	headerCryptoKey := r.Header.Get("Crypto-Key")
 	headerAuthorization := r.Header.Get("Authorization")
 	b, _ := ioutil.ReadAll(r.Body)
-	bodyB64 := base64.StdEncoding.EncodeToString(b)
 
 	salt := ""
 	if strings.HasPrefix(headerEncryption, "salt=") {
@@ -54,7 +53,6 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("dh         :", dh)                    // BCC42wgRWCcMIquAAyegXXXXXXXXXXXAhzIc61XXXXXXXXXPL5r2Ndh9RRGYvpaH2_BU
 	fmt.Println("p256ecdsa  :", p256ecdsa)             // BPf7TFNX-XXXXXX_XXXXXXX-pyAI8sJyYYt62Dus0Mxpy8OF9kbG5gIxxxxxxXXkwsKvcnTA
 	fmt.Println("jwt        :", jwt)                   // XXX.xxxx.xxxx
-	fmt.Println("bodyb64    :", bodyB64)
 
 	check, err := dataAccess.DA.Has(subscribeID)
 	if err != nil {
@@ -74,8 +72,8 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	plaintext, err := ece.Decrypt(b,
 		ece.WithEncoding(ece.AESGCM),
 		ece.WithSalt(du(salt)),
-		ece.WithAuthSecret(d(ds.PushAuth)),
-		ece.WithPrivate(d(ds.PushPrivateKey)),
+		ece.WithAuthSecret(du(ds.PushAuth)),
+		ece.WithPrivate(du(ds.PushPrivateKey)),
 		ece.WithDh(du(dh)),
 	)
 	if err != nil {
@@ -84,14 +82,6 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("plaintext  :", string(plaintext))
-}
-
-func d(text string) []byte {
-	b, err := base64.StdEncoding.DecodeString(text)
-	if err != nil {
-		panic(err)
-	}
-	return b
 }
 
 func du(text string) []byte {

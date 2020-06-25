@@ -59,7 +59,7 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 	// AuthSecret = Base64 encoded string of 16 bytes of random data.
 	authSecret := make([]byte, 16)
 	rand.Read(authSecret)
-	auth := base64.StdEncoding.EncodeToString([]byte(authSecret))
+	auth := base64.RawURLEncoding.EncodeToString([]byte(authSecret))
 
 	// Web Push APIに登録
 	// VAPID Keyを生成
