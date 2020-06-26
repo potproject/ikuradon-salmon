@@ -16,25 +16,26 @@ import (
 	"github.com/sethvargo/go-password/password"
 )
 
-type SubscribeRequest struct {
+type subscribeRequest struct {
 	Domain            string // domain
 	AccessToken       string // access_token
 	ExponentPushToken string // exponent_push_token
 }
 
-type SubscribeResponse struct {
+type subscribeResponse struct {
 	Result bool `json:"result"`
 
-	Data SubscribeResponseData `json:"data"`
+	Data subscribeResponseData `json:"data"`
 }
 
-type SubscribeResponseData struct {
+type subscribeResponseData struct {
 	// 64 characters
-	SubscribeId string `json:"subscribe_id"`
+	SubscribeID string `json:"subscribe_id"`
 }
 
+// PostSubscribe post subscribe
 func PostSubscribe(w http.ResponseWriter, r *http.Request) {
-	req := SubscribeRequest{
+	req := subscribeRequest{
 		Domain:            r.FormValue("domain"),
 		AccessToken:       r.FormValue("access_token"),
 		ExponentPushToken: r.FormValue("exponent_push_token"),
@@ -108,10 +109,10 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 	// OK!
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(SubscribeResponse{
+	res, _ := json.Marshal(subscribeResponse{
 		Result: true,
-		Data: SubscribeResponseData{
-			SubscribeId: subscribeID,
+		Data: subscribeResponseData{
+			SubscribeID: subscribeID,
 		},
 	})
 	w.Write(res)

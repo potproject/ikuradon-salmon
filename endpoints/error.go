@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// ErrorResponseErrors Error Response
 type ErrorResponseErrors struct {
 	// Error Code
 	Code string `json:"code"`
@@ -13,6 +14,7 @@ type ErrorResponseErrors struct {
 	Message string `json:"message"`
 }
 
+// ErrorResponseBody Error Body
 type ErrorResponseBody struct {
 	// Always `false`.
 	Result bool `json:"result"`
@@ -20,6 +22,7 @@ type ErrorResponseBody struct {
 	Errors ErrorResponseErrors `json:"errors"`
 }
 
+// ErrorResponse http Error Response
 func ErrorResponse(w http.ResponseWriter, r *http.Request, status int, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

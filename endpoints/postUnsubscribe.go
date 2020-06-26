@@ -9,11 +9,12 @@ import (
 	"github.com/potproject/ikuradon-salmon/dataAccess"
 )
 
-type UnSubscribeRequest struct {
+type unSubscribeRequest struct {
 	// 64 characters
-	SubscribeId string // subscribe_id
+	SubscribeID string // subscribe_id
 }
 
+// PostUnsubscribe post unsubscribe
 func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	reqToken := r.Header.Get("Authorization")
 	splitToken := strings.Split(reqToken, "Bearer ")
@@ -21,12 +22,12 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	req := UnSubscribeRequest{
-		SubscribeId: splitToken[1],
+	req := unSubscribeRequest{
+		SubscribeID: splitToken[1],
 	}
 
 	// 存在チェック
-	check, err := dataAccess.DA.Has(req.SubscribeId)
+	check, err := dataAccess.DA.Has(req.SubscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -37,17 +38,17 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 消します
-	err = dataAccess.DA.Delete(req.SubscribeId)
+	err = dataAccess.DA.Delete(req.SubscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(SubscribeResponse{
+	res, _ := json.Marshal(subscribeResponse{
 		Result: true,
-		Data: SubscribeResponseData{
-			SubscribeId: req.SubscribeId,
+		Data: subscribeResponseData{
+			SubscribeID: req.SubscribeID,
 		},
 	})
 	w.Write(res)

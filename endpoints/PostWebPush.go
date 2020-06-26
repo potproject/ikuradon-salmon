@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -27,6 +28,16 @@ type pushPayload struct {
 	AuthSecret      []byte
 	PrivateKey      []byte
 	PlainText       string
+}
+
+type notification struct {
+	NotificationID   int    `json:"notification_id"`
+	AccessToken      string `json:"access_token"`
+	PreferredLocale  string `json:"preferred_locale"`
+	NotificationType string `json:"notification_type"`
+	Icon             string `json:"icon"`
+	Title            string `json:"title"`
+	Body             string `json:"body"`
 }
 
 func setPayload(r *http.Request) (p pushPayload, err error) {
@@ -120,6 +131,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 	return
 }
 
+// PostWebPush Webpush Endpoint
 func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	p, err := setPayload(r)
 	if err != nil {
@@ -127,7 +139,12 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	fmt.Printf("%+v", p)
-	fmt.Println()
+	var n notification
+	err = json.Unmarshal([]byte(p.PlainText), &n)
+	if err != nil {
+		fmt.Println("error Decrypt.", err.Error())
+		ErrorResponse(w, r, http.StatusInternalServerError, err)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
