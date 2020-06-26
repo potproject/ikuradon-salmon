@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	ece "github.com/crow-misia/http-ece"
@@ -13,81 +14,119 @@ import (
 	"github.com/potproject/ikuradon-salmon/dataAccess"
 )
 
-func PostWebPush(w http.ResponseWriter, r *http.Request) {
+type pushPayload struct {
+	SubscribeID     string
+	ContentEncoding ece.ContentEncoding
+	TTL             int
+	ContentType     string
+	Salt            []byte
+	DH              []byte
+	P256ECDSA       []byte
+	JWT             string
+	EncryptedBody   []byte
+	AuthSecret      []byte
+	PrivateKey      []byte
+	PlainText       string
+}
+
+func setPayload(r *http.Request) (p pushPayload, err error) {
+	p = pushPayload{}
+	err = nil
+	// SubscribeID
 	vars := mux.Vars(r)
-	subscribeID := vars["subscribeID"]
+	p.SubscribeID = vars["subscribeID"]
 
-	headerEncryption := r.Header.Get("Encryption")
+	// ContentEncoding
 	headerContentEncoding := r.Header.Get("Content-Encoding")
-	headerTtl := r.Header.Get("Ttl")
-	headerContentType := r.Header.Get("Content-Type")
-	headerCryptoKey := r.Header.Get("Crypto-Key")
-	headerAuthorization := r.Header.Get("Authorization")
-	b, _ := ioutil.ReadAll(r.Body)
-
-	salt := ""
-	if strings.HasPrefix(headerEncryption, "salt=") {
-		salt = headerEncryption[5:]
+	if headerContentEncoding == "aes128gcm" {
+		p.ContentEncoding = ece.AES128GCM
+	} else {
+		p.ContentEncoding = ece.AESGCM
 	}
+
+	// TTL
+	p.TTL, _ = strconv.Atoi(r.Header.Get("Ttl"))
+
+	// ContentType
+	p.ContentType = r.Header.Get("Content-Type")
+
+	// Salt
+	headerEncryption := r.Header.Get("Encryption")
+	if strings.HasPrefix(headerEncryption, "salt=") {
+		salt := headerEncryption[5:]
+		p.Salt, _ = base64.RawURLEncoding.DecodeString(salt)
+	}
+
+	// DH
+	// P256ECDSA
+	headerCryptoKey := r.Header.Get("Crypto-Key")
 	sliceHeaderCryptoKey := strings.Split(headerCryptoKey, ";")
-	dh := ""
-	p256ecdsa := ""
 	for _, ckey := range sliceHeaderCryptoKey {
 		if strings.HasPrefix(ckey, "dh=") {
-			dh = ckey[3:]
+			p.DH, _ = base64.RawURLEncoding.DecodeString(ckey[3:])
 		}
 		if strings.HasPrefix(ckey, "p256ecdsa=") {
-			p256ecdsa = ckey[10:]
+			p.P256ECDSA, _ = base64.RawURLEncoding.DecodeString(ckey[10:])
 		}
 	}
-	jwt := ""
+	// JWT
+	headerAuthorization := r.Header.Get("Authorization")
 	if strings.HasPrefix(headerAuthorization, "WebPush ") {
-		jwt = headerAuthorization[8:]
+		p.JWT = headerAuthorization[8:]
 	}
-	fmt.Println("Sid        :", subscribeID)
-	fmt.Println("C-E        :", headerContentEncoding) // "aesgcm"
-	fmt.Println("ttl        :", headerTtl)             // 172800
-	fmt.Println("c-t        :", headerContentType)     // application/octet-stream
-	fmt.Println("Encryption :", headerEncryption)      //
-	fmt.Println("salt       :", salt)                  // EhJrnT2cqiZXXXXXX
-	fmt.Println("dh         :", dh)                    // BCC42wgRWCcMIquAAyegXXXXXXXXXXXAhzIc61XXXXXXXXXPL5r2Ndh9RRGYvpaH2_BU
-	fmt.Println("p256ecdsa  :", p256ecdsa)             // BPf7TFNX-XXXXXX_XXXXXXX-pyAI8sJyYYt62Dus0Mxpy8OF9kbG5gIxxxxxxXXkwsKvcnTA
-	fmt.Println("jwt        :", jwt)                   // XXX.xxxx.xxxx
 
-	check, err := dataAccess.DA.Has(subscribeID)
-	if err != nil {
-		ErrorResponse(w, r, http.StatusNotFound, err)
+	// EncryptedBody
+	p.EncryptedBody, _ = ioutil.ReadAll(r.Body)
+
+	// AuthSecret
+	// PrivateKey
+	check, errDB := dataAccess.DA.Has(p.SubscribeID)
+	if errDB != nil {
+		err = errDB
 		return
 	}
 	if !check {
-		ErrorResponse(w, r, http.StatusNotFound, errors.New("NotFound"))
+		err = errors.New("NotFound")
 		return
 	}
-	ds, err := dataAccess.DA.Get(subscribeID)
+	ds, errDB := dataAccess.DA.Get(p.SubscribeID)
+	if errDB != nil {
+		err = errDB
+		return
+	}
+	p.AuthSecret, _ = base64.RawURLEncoding.DecodeString(ds.PushAuth)
+	p.PrivateKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPrivateKey)
+	var plaintextByte []byte
+	if p.ContentEncoding == ece.AESGCM {
+		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
+			ece.WithEncoding(p.ContentEncoding),
+			ece.WithSalt(p.Salt),
+			ece.WithAuthSecret(p.AuthSecret),
+			ece.WithPrivate(p.PrivateKey),
+			ece.WithDh(p.DH),
+		)
+	} else {
+		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
+			ece.WithEncoding(p.ContentEncoding),
+			ece.WithAuthSecret(p.AuthSecret),
+			ece.WithPrivate(p.PrivateKey),
+			ece.WithDh(p.DH),
+		)
+	}
 	if err != nil {
-		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
+	p.PlainText = string(plaintextByte)
+	return
+}
 
-	plaintext, err := ece.Decrypt(b,
-		ece.WithEncoding(ece.AESGCM),
-		ece.WithSalt(du(salt)),
-		ece.WithAuthSecret(du(ds.PushAuth)),
-		ece.WithPrivate(du(ds.PushPrivateKey)),
-		ece.WithDh(du(dh)),
-	)
+func PostWebPush(w http.ResponseWriter, r *http.Request) {
+	p, err := setPayload(r)
 	if err != nil {
 		fmt.Println("error Decrypt.", err.Error())
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	fmt.Println("plaintext  :", string(plaintext))
-}
-
-func du(text string) []byte {
-	b, err := base64.RawURLEncoding.DecodeString(text)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	fmt.Printf("%+v", p)
+	fmt.Println()
 }

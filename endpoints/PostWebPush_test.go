@@ -1,9 +1,0 @@
-package endpoints
-
-import (
-	"testing"
-)
-
-func Test_d(t *testing.T) {
-	du("VvMwwmuU/WI4qD+awwWS6g0kNhNn9ejWPXQtTBxVeT/UhsBImaHknJyL8KWoJXZoOCzivFU+p3iAbx8IcO4Rox7jtUizBpKK1VxlpRvLvXjAQlyaYYLVtOlfWbwsyAXIEhEREGH0J1F2jmbMl1RnebMmCw86iTkmS4vgPXuRO1wfBYi5g3j2yb4O3AdyBLcoF8ZUCylz3hrbHGqJXjkRorIytJ6n9gzIiSfi0X0NmcQ5XTuimJXH19Ea+aZ5MqtB/+VTfliyn4KpPA0HCZWgeZHuOGxDl/PE9iyyZqCOER0RINzinAJrcPnFIY9WaMUMaer7jb/hnfE4CtwlOI4GjLut7zkIsIcpHasV8fGZOp/Sgqd1VolON1nSnQMb47UqG9bzdL9wn4K0d1NVvvCG8fi2pzTBjCyKpF+uBA32Wsl+8Bla/WTfuMZ7TySPX57uxTmyiXcHcyMO8WIcC/0XX9PARTaSSxqkCwZUWe6cIKNGadVRMOLyAxmqAEjAO+ZtrecFHV57aBtQhj8=")
-}
