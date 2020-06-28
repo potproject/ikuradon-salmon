@@ -16,6 +16,7 @@ RUN apk --no-cache add tzdata
 #RUN cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 COPY --from=build-env /build/app /build/app
-RUN chmod u+x /build/app
+
+RUN chmod u+x /build/app && /build/app/data
 
 ENTRYPOINT ["/build/app"]
