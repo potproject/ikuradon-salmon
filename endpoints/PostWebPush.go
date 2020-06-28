@@ -13,31 +13,24 @@ import (
 	ece "github.com/crow-misia/http-ece"
 	"github.com/gorilla/mux"
 	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/network"
+	"github.com/potproject/ikuradon-salmon/notification"
 )
 
 type pushPayload struct {
-	SubscribeID     string
-	ContentEncoding ece.ContentEncoding
-	TTL             int
-	ContentType     string
-	Salt            []byte
-	DH              []byte
-	P256ECDSA       []byte
-	JWT             string
-	EncryptedBody   []byte
-	AuthSecret      []byte
-	PrivateKey      []byte
-	PlainText       string
-}
-
-type notification struct {
-	NotificationID   int    `json:"notification_id"`
-	AccessToken      string `json:"access_token"`
-	PreferredLocale  string `json:"preferred_locale"`
-	NotificationType string `json:"notification_type"`
-	Icon             string `json:"icon"`
-	Title            string `json:"title"`
-	Body             string `json:"body"`
+	SubscribeID       string
+	ContentEncoding   ece.ContentEncoding
+	TTL               int
+	ContentType       string
+	Salt              []byte
+	DH                []byte
+	P256ECDSA         []byte
+	JWT               string
+	EncryptedBody     []byte
+	AuthSecret        []byte
+	PrivateKey        []byte
+	PlainText         string
+	ExponentPushToken string
 }
 
 func setPayload(r *http.Request) (p pushPayload, err error) {
@@ -91,6 +84,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 
 	// AuthSecret
 	// PrivateKey
+	// ExponentPushToken
 	check, errDB := dataAccess.DA.Has(p.SubscribeID)
 	if errDB != nil {
 		err = errDB
@@ -107,6 +101,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 	}
 	p.AuthSecret, _ = base64.RawURLEncoding.DecodeString(ds.PushAuth)
 	p.PrivateKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPrivateKey)
+	p.ExponentPushToken = ds.ExponentPushToken
 	var plaintextByte []byte
 	if p.ContentEncoding == ece.AESGCM {
 		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
@@ -139,12 +134,13 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	var n notification
+	var n notification.N
 	err = json.Unmarshal([]byte(p.PlainText), &n)
 	if err != nil {
 		fmt.Println("error Decrypt.", err.Error())
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
+	err = network.PushExpo(p.ExponentPushToken, n)
 	w.WriteHeader(http.StatusOK)
 }

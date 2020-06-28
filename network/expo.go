@@ -2,9 +2,12 @@ package network
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/potproject/ikuradon-salmon/notification"
 )
 
 const expoURL = "https://exp.host"
@@ -12,9 +15,30 @@ const pushExpoEndpoints = "/--/api/v2/push/send"
 
 const expoTimeout = 10 * time.Second
 
-func PushExpo(exponentPushToken string) error {
+type message struct {
+	To        string         `json:"to"`
+	Data      notification.N `json:"data"`
+	Title     string         `json:"title"`
+	Body      string         `json:"body"`
+	TTL       string         `json:"ttl,omitempty"`
+	Priority  string         `json:"priority,omitempty"`  // ('default' | 'normal' | 'high')
+	Subtitle  string         `json:"subtitle,omitempty"`  // iOS Only
+	Sound     string         `json:"sound,omitempty"`     // iOS Only ('default' | null)
+	Badge     int            `json:"badge,omitempty"`     // iOS Only
+	ChannelID string         `json:"channelId,omitempty"` // Android Only
+}
+
+func PushExpo(exponentPushToken string, data notification.N) error {
 	url := expoURL + pushExpoEndpoints
-	body := `{"ids": ["XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"]}`
+	message := message{
+		To:    exponentPushToken,
+		Data:  data,
+		Title: data.Title,
+		Body:  data.Body,
+		Sound: "default",
+		Badge: 1,
+	}
+	body, _ := json.Marshal(message)
 	req, _ := http.NewRequest("POST", url, bytes.NewReader([]byte(body)))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Accept-encoding", "gzip, deflate")
