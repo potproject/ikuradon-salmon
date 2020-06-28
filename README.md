@@ -2,7 +2,7 @@
 
 __!!Work In Progress!!__
 
-ikuradon Push Server
+[ikuradon](https://github.com/potproject/ikuradon) Push Server
 
 ## Architecture
 
