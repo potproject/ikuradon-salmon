@@ -17,6 +17,6 @@ RUN apk --no-cache add tzdata
 
 COPY --from=build-env /build/app /build/app
 
-RUN chmod u+x /build/app && /build/app/data
+RUN chmod u+x /build/app && mkdir /data
 
 ENTRYPOINT ["/build/app"]
