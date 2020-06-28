@@ -1,5 +1,7 @@
 # ikuradon-salmon
 
+__!!Work In Progress!!__
+
 ikuradon Push Server
 
 ## Architecture
@@ -12,14 +14,15 @@ Expo Push Notifications Documents: https://docs.expo.io/guides/push-notification
 
 # API Documents
 
-[/swagger.yaml](OpenAPI 3.0)
+[OpenAPI 3.0](/swagger.yaml)
 
 ## build
+
 ```
 go build main.go
 ```
 
-## Production Run Server
+## Production Run Server (Docker)
 
 1. Setting `.env:` file `BASE_URL`
 
