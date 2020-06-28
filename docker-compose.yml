@@ -9,6 +9,8 @@ services:
       - internal_network
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider --proxy=off localhost:8080/health-check || exit 1"]
+    volumes:
+          - ./data:/build/app/data
     ports:
       - "8080:8080"
 #    depends_on:
