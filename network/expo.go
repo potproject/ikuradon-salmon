@@ -36,7 +36,6 @@ func PushExpo(exponentPushToken string, data notification.N) error {
 		Title: data.Title,
 		Body:  data.Body,
 		Sound: "default",
-		Badge: 1,
 	}
 	body, _ := json.Marshal(message)
 	req, _ := http.NewRequest("POST", url, bytes.NewReader([]byte(body)))
