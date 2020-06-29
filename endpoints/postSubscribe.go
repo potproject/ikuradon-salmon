@@ -1,8 +1,11 @@
 package endpoints
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +16,6 @@ import (
 	"github.com/potproject/ikuradon-salmon/dataAccess"
 	"github.com/potproject/ikuradon-salmon/network"
 	"github.com/potproject/ikuradon-salmon/setting"
-	"github.com/sethvargo/go-password/password"
 )
 
 type subscribeRequest struct {
@@ -45,62 +47,46 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subscribeID, err := password.Generate(24, 10, 0, false, true)
+	// SubscribeID ExponentPushToken HMAC-SHA256
+	subscribeID := makeHMAC(req.ExponentPushToken, setting.S.Salt)
+	exist, _ := dataAccess.DA.Has(subscribeID)
+	if exist {
+		updateSubscribe(w, r, subscribeID, req)
+	} else {
+		newSubscribe(w, r, subscribeID, req)
+	}
+}
+
+func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, req subscribeRequest) {
+	ds, err := dataAccess.DA.Get(subscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
-	// Mastodonに信頼チェック
-	id, username, err := network.VerifyMastodon(req.Domain, req.AccessToken)
-	if err != nil {
-		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
-		return
-	}
-	// AuthSecret = Base64 encoded string of 16 bytes of random data.
-	authSecret := make([]byte, 16)
-	rand.Read(authSecret)
-	auth := base64.RawURLEncoding.EncodeToString([]byte(authSecret))
-
-	// Web Push APIに登録
-	// VAPID Keyを生成
-	privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
-
-	endpoints := setting.S.BaseURL + "api/v1/webpush/" + subscribeID
-	if setting.S.BaseURL == "" {
-		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush/%s", setting.S.ApiHost, setting.S.ApiPort, subscribeID)
-	}
-
+	endpoints := makeEndpoints(subscribeID)
 	rps, err := network.PushSubscribeMastodon(
 		req.Domain,
 		req.AccessToken,
 		endpoints,
-		publicKey,
-		auth,
+		ds.PushPublicKey,
+		ds.PushAuth,
 	)
-	if err != nil {
-		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
-		return
-	}
 
-	// データ登録
+	// Data Set
 	now := time.Now().Unix()
 	err = dataAccess.DA.Set(subscribeID, dataAccess.DataSet{
-		SubscribeId:        subscribeID,
-		UserID:             id,
-		Username:           username,
-		Domain:             req.Domain,
-		AccessToken:        req.AccessToken,
-		ExponentPushToken:  req.ExponentPushToken,
-		PushPrivateKey:     privateKey,
-		PushPublicKey:      publicKey,
-		PushAuth:           auth,
-		ServerKey:          rps.ServerKey,
-		CreatedAt:          now,
-		ExpiredAt:          0,
-		LastUpdatedAt:      now,
-		ServerLastId:       0,
-		NotificationsCount: 0,
+		SubscribeID:       subscribeID,
+		UserID:            ds.UserID,
+		Username:          ds.Username,
+		Domain:            req.Domain,
+		AccessToken:       req.AccessToken,
+		ExponentPushToken: req.ExponentPushToken,
+		PushPrivateKey:    ds.PushPrivateKey,
+		PushPublicKey:     ds.PushPublicKey,
+		PushAuth:          ds.PushAuth,
+		ServerKey:         rps.ServerKey,
+		CreatedAt:         ds.CreatedAt,
+		LastUpdatedAt:     now,
 	})
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
@@ -116,4 +102,80 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 	w.Write(res)
+}
+
+func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, req subscribeRequest) {
+	// Mastodon Vertify
+	id, username, err := network.VerifyMastodon(req.Domain, req.AccessToken)
+	if err != nil {
+		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
+		return
+	}
+	// AuthSecret = Base64 encoded string of 16 bytes of random data.
+	authSecret := make([]byte, 16)
+	rand.Read(authSecret)
+	auth := base64.RawURLEncoding.EncodeToString([]byte(authSecret))
+
+	// Web Push API Subscribing
+	// generate VAPID Key
+	privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
+
+	endpoints := makeEndpoints(subscribeID)
+
+	rps, err := network.PushSubscribeMastodon(
+		req.Domain,
+		req.AccessToken,
+		endpoints,
+		publicKey,
+		auth,
+	)
+	if err != nil {
+		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
+		return
+	}
+
+	// Data Set
+	now := time.Now().Unix()
+	err = dataAccess.DA.Set(subscribeID, dataAccess.DataSet{
+		SubscribeID:       subscribeID,
+		UserID:            id,
+		Username:          username,
+		Domain:            req.Domain,
+		AccessToken:       req.AccessToken,
+		ExponentPushToken: req.ExponentPushToken,
+		PushPrivateKey:    privateKey,
+		PushPublicKey:     publicKey,
+		PushAuth:          auth,
+		ServerKey:         rps.ServerKey,
+		CreatedAt:         now,
+		LastUpdatedAt:     now,
+	})
+	if err != nil {
+		ErrorResponse(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	// OK!
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	res, _ := json.Marshal(subscribeResponse{
+		Result: true,
+		Data: subscribeResponseData{
+			SubscribeID: subscribeID,
+		},
+	})
+	w.Write(res)
+}
+
+func makeHMAC(msg, key string) string {
+	mac := hmac.New(sha256.New, []byte(key))
+	mac.Write([]byte(msg))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+func makeEndpoints(subscribeID string) string {
+	endpoints := setting.S.BaseURL + "api/v1/webpush/" + subscribeID
+	if setting.S.BaseURL == "" {
+		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush/%s", setting.S.ApiHost, setting.S.ApiPort, subscribeID)
+	}
+	return endpoints
 }

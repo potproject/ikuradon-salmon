@@ -22,6 +22,7 @@ var S = setting{
 type setting struct {
 	AppName       string
 	AppVersion    string
+	Salt          string
 	BaseURL       string
 	ApiHost       string
 	ApiPort       uint16
@@ -38,6 +39,9 @@ func SetSetting() {
 	}
 	if appVersion := os.Getenv("APP_VERSION"); appVersion != "" {
 		S.AppVersion = appVersion
+	}
+	if salt := os.Getenv("SALT"); salt != "" {
+		S.Salt = salt
 	}
 	if baseURL := os.Getenv("BASE_URL"); baseURL != "" {
 		S.BaseURL = baseURL
