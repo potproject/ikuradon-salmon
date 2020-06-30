@@ -24,6 +24,8 @@ type ResPushSubscribe struct {
 	ServerKey string `json:"server_key"`
 }
 
+// PushSubscribeMastodon Subscribe to push notifications
+// See: https://docs.joinmastodon.org/methods/notifications/push/
 func PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoint string, subscriptionKeysP256dh string, subscriptionKeysAuth string) (ResPushSubscribe, error) {
 	endpoints := fmt.Sprintf("https://%s%s", domain, pushSubscribeMastodonEndpoints)
 	values := url.Values{}
@@ -64,6 +66,7 @@ func PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoi
 }
 
 // PushUnsubscribeMastodon Remove current subscription
+// See: https://docs.joinmastodon.org/methods/notifications/push/
 func PushUnsubscribeMastodon(domain string, accessToken string) error {
 	endpoints := fmt.Sprintf("https://%s%s", domain, pushSubscribeMastodonEndpoints)
 	req, _ := http.NewRequest("DELETE", endpoints, nil)
