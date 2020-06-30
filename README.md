@@ -12,7 +12,15 @@ Mastodon Web Push API Documents: https://docs.joinmastodon.org/methods/notificat
 
 Expo Push Notifications Documents: https://docs.expo.io/guides/push-notifications/
 
-# API Documents
+## Security
+
+ikuradon-salmonは、暗号化されたコンテンツを複合し、Expo サーバーに送信する仕様になっています。
+アクセストークンをPushサーバに送信することになるため、信頼できないikuradon-salmonサーバにアクセストークンを送ることはセキュリティ上のリスクが伴います。
+
+ikuradon-salmon server decrypts the encrypted content and sends it to the Expo server.
+Sending the access token to an untrusted ikuradon-salmon server is a security risk because it will send the access token to the Push server.
+
+## API Documents
 
 [OpenAPI 3.0](/swagger.yaml)
 
