@@ -70,26 +70,26 @@ paths:
                         type: string
                         description: 'Expo Push Token'
                         example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxx]'
+                      push_private_key:
+                        type: string
+                        description: 'Private Key'
+                      push_public_key:
+                        type: string
+                        description: 'Public Key'
+                      push_auth:
+                        type: string
+                        description: 'Auth Common Key'
+                      server_key:
+                        type: string
+                        description: 'Push Server Key'
                       created_at:
                         type: number
                         description: 'Created UNIXTIME'
                         example: 1591636409
-                      expired_at:
-                        type: number
-                        description: 'Expired UNIXTIME'
-                        example: 1591639409
                       last_updated_at:
                         type: number
                         description: 'Last Updated UNIXTIME'
                         example: 1591636409
-                      server_last_id:
-                        type: number
-                        description: 'Server Timeline last_id'
-                        example: 1234
-                      notifications_count:
-                        type: number
-                        description: 'Push Count'
-                        example: 0
         '401':
           description: 'Unauthorized - invailed subscribe_id'
           content:
@@ -164,8 +164,31 @@ paths:
   /api/v1/unsubscribe:
     post:
       summary: 'UnSubscribe to push notifications.'
-      security:
-      - bearerAuth: []
+      parameters:
+        -
+          name: domain
+          in: query
+          description: 'Mastodon Server Domain'
+          required: true
+          schema:
+            type: string
+          example: 'mastodon.social'
+        -
+          name: access_token
+          in: query
+          description: 'Mastodon AccessToken'
+          required: true
+          schema:
+            type: string
+          example: 'MastodonAccessTokenStrings'
+        -
+          name: exponent_push_token
+          in: query
+          description: 'ExponentPushToken'
+          required: true
+          schema:
+            type: string
+          example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxx]'
       responses:
         '200':
           description: Response

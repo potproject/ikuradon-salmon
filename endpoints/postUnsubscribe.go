@@ -4,30 +4,30 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/network"
+	"github.com/potproject/ikuradon-salmon/setting"
 )
-
-type unSubscribeRequest struct {
-	// 64 characters
-	SubscribeID string // subscribe_id
-}
 
 // PostUnsubscribe post unsubscribe
 func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	if len(splitToken) != 2 || splitToken[1] == "" {
-		ErrorResponse(w, r, http.StatusUnauthorized, errors.New("Unauthorized"))
+	req := subscribeRequest{
+		Domain:            r.FormValue("domain"),
+		AccessToken:       r.FormValue("access_token"),
+		ExponentPushToken: r.FormValue("exponent_push_token"),
+	}
+	if req.Domain == "" || req.AccessToken == "" || req.ExponentPushToken == "" {
+		ErrorResponse(w, r, http.StatusBadRequest, errors.New("Bad Request"))
 		return
 	}
-	req := unSubscribeRequest{
-		SubscribeID: splitToken[1],
-	}
 
-	// 存在チェック
-	check, err := dataAccess.DA.Has(req.SubscribeID)
+	// Unique HMAC-SHA256
+	uniq := req.Domain + ":" + req.AccessToken + ":" + req.ExponentPushToken
+	subscribeID := makeHMAC(uniq, setting.S.Salt)
+
+	// if exists?
+	check, err := dataAccess.DA.Has(subscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -37,8 +37,18 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 消します
-	err = dataAccess.DA.Delete(req.SubscribeID)
+	// Deleting Mastodon Server
+	err = network.PushUnsubscribeMastodon(
+		req.Domain,
+		req.AccessToken,
+	)
+
+	if err != nil {
+		ErrorResponse(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	// Deleting DA
+	err = dataAccess.DA.Delete(subscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -48,7 +58,7 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	res, _ := json.Marshal(subscribeResponse{
 		Result: true,
 		Data: subscribeResponseData{
-			SubscribeID: req.SubscribeID,
+			SubscribeID: subscribeID,
 		},
 	})
 	w.Write(res)

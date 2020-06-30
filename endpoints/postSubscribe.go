@@ -47,8 +47,9 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// SubscribeID ExponentPushToken HMAC-SHA256
-	subscribeID := makeHMAC(req.ExponentPushToken, setting.S.Salt)
+	// Unique HMAC-SHA256
+	uniq := req.Domain + ":" + req.AccessToken + ":" + req.ExponentPushToken
+	subscribeID := makeHMAC(uniq, setting.S.Salt)
 	exist, _ := dataAccess.DA.Has(subscribeID)
 	if exist {
 		updateSubscribe(w, r, subscribeID, req)
