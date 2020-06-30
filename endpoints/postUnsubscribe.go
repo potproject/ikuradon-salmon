@@ -38,15 +38,11 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Deleting Mastodon Server
-	err = network.PushUnsubscribeMastodon(
+	_ = network.PushUnsubscribeMastodon(
 		req.Domain,
 		req.AccessToken,
 	)
 
-	if err != nil {
-		ErrorResponse(w, r, http.StatusInternalServerError, err)
-		return
-	}
 	// Deleting DA
 	err = dataAccess.DA.Delete(subscribeID)
 	if err != nil {
