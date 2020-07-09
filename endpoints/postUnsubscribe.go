@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/dataaccess"
 	"github.com/potproject/ikuradon-salmon/network"
 	"github.com/potproject/ikuradon-salmon/setting"
 )
@@ -27,7 +27,7 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	subscribeID := makeHMAC(uniq, setting.S.Salt)
 
 	// if exists?
-	check, err := dataAccess.DA.Has(subscribeID)
+	check, err := dataaccess.DA.Has(subscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -44,7 +44,7 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	)
 
 	// Deleting DA
-	err = dataAccess.DA.Delete(subscribeID)
+	err = dataaccess.DA.Delete(subscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return

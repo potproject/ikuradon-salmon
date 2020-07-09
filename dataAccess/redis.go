@@ -1,4 +1,4 @@
-package dataAccess
+package dataaccess
 
 import (
 	"context"
@@ -15,6 +15,7 @@ type dataAccessRedis struct {
 	client *redis.Client
 }
 
+// SetRedis Setting Redis Database
 func SetRedis() {
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", setting.S.RedisHost, setting.S.RedisPort),

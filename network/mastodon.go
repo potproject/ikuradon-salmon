@@ -14,11 +14,13 @@ const notificationsMastodonEndpoints = "/api/v1/notifications"
 
 const mastodonTimeout = 30 * time.Second
 
+// ResVerify Mastodon id and username Response
 type ResVerify struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 }
 
+// VerifyMastodon GET:/api/v1/verify_credentials Mastodon Server
 func VerifyMastodon(domain string, accessToken string) (string, string, error) {
 	url := fmt.Sprintf("https://%s%s", domain, verifyMastodonEndpoints)
 	req, _ := http.NewRequest("GET", url, nil)

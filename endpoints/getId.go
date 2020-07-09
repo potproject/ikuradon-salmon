@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/dataaccess"
 )
 
 type idRequest struct {
@@ -17,7 +17,7 @@ type idRequest struct {
 type idResponse struct {
 	Result bool `json:"result"`
 
-	Data dataAccess.DataSet `json:"data"`
+	Data dataaccess.DataSet `json:"data"`
 }
 
 // GetID get ID
@@ -31,7 +31,7 @@ func GetID(w http.ResponseWriter, r *http.Request) {
 	reqParam := idRequest{
 		SubscribeID: splitToken[1],
 	}
-	check, err := dataAccess.DA.Has(reqParam.SubscribeID)
+	check, err := dataaccess.DA.Has(reqParam.SubscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -40,7 +40,7 @@ func GetID(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusNotFound, errors.New("NotFound"))
 		return
 	}
-	ds, err := dataAccess.DA.Get(reqParam.SubscribeID)
+	ds, err := dataaccess.DA.Get(reqParam.SubscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return

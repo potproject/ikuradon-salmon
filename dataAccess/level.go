@@ -1,4 +1,4 @@
-package dataAccess
+package dataaccess
 
 import (
 	"encoding/json"
@@ -12,6 +12,7 @@ type dataAccessLevel struct {
 	db *leveldb.DB
 }
 
+// SetLevel Setting LevelDB
 func SetLevel(path string) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {

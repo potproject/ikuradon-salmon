@@ -11,6 +11,7 @@ import (
 
 const pushSubscribeMastodonEndpoints = "/api/v1/push/subscription"
 
+// ResPushSubscribe Mastodon POST:/api/v1/push/subscription Response
 type ResPushSubscribe struct {
 	ID       int64  `json:"id"`
 	Endpoint string `json:"endpoint"`
@@ -78,6 +79,9 @@ func PushUnsubscribeMastodon(domain string, accessToken string) error {
 		Timeout: mastodonTimeout,
 	}
 	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err

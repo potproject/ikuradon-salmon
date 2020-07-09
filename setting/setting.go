@@ -6,12 +6,13 @@ import (
 	"strconv"
 )
 
+// S setting
 var S = setting{
 	AppName:       "ikuradon-salmon",
 	AppVersion:    "unversioned",
 	BaseURL:       "",
-	ApiHost:       "0.0.0.0",
-	ApiPort:       8080,
+	APIHost:       "0.0.0.0",
+	APIPort:       8080,
 	UseRedis:      false,
 	RedisHost:     "redis",
 	RedisPort:     6379,
@@ -24,8 +25,8 @@ type setting struct {
 	AppVersion    string
 	Salt          string
 	BaseURL       string
-	ApiHost       string
-	ApiPort       uint16
+	APIHost       string
+	APIPort       uint16
 	UseRedis      bool
 	RedisHost     string
 	RedisPort     uint16
@@ -33,6 +34,7 @@ type setting struct {
 	RedisDatabase int
 }
 
+// SetSetting Add Setting
 func SetSetting() {
 	if appName := os.Getenv("APP_NAME"); appName != "" {
 		S.AppName = appName
@@ -47,14 +49,14 @@ func SetSetting() {
 		S.BaseURL = baseURL
 	}
 	if apiHost := os.Getenv("API_HOST"); apiHost != "" {
-		S.ApiHost = apiHost
+		S.APIHost = apiHost
 	}
 	if apiPort := os.Getenv("API_PORT"); apiPort != "" {
 		apiPortuint16, err := strconv.ParseUint(os.Getenv("API_PORT"), 10, 16)
 		if err != nil {
 			log.Fatal(err)
 		}
-		S.ApiPort = uint16(apiPortuint16)
+		S.APIPort = uint16(apiPortuint16)
 	}
 	if useRedis := os.Getenv("USE_REDIS"); useRedis == "true" {
 		S.UseRedis = true

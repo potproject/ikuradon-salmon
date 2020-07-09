@@ -1,7 +1,9 @@
-package dataAccess
+package dataaccess
 
+// DA DataAccess struct
 var DA DataAccess
 
+// DataAccess Access Wrapper Interface
 type DataAccess interface {
 	Get(key string) (DataSet, error)
 	Has(key string) (bool, error)
@@ -16,6 +18,7 @@ type param struct {
 	Value DataSet // DataSet
 }
 
+// DataSet JSON Subscribe Data struct
 type DataSet struct {
 	SubscribeID       string `json:"subscribe_id"`
 	UserID            string `json:"user_id"`

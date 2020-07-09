@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/dataaccess"
 	"github.com/potproject/ikuradon-salmon/network"
 	"github.com/potproject/ikuradon-salmon/setting"
 )
@@ -50,7 +50,7 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 	// Unique HMAC-SHA256
 	uniq := req.Domain + ":" + req.AccessToken + ":" + req.ExponentPushToken
 	subscribeID := makeHMAC(uniq, setting.S.Salt)
-	exist, _ := dataAccess.DA.Has(subscribeID)
+	exist, _ := dataaccess.DA.Has(subscribeID)
 	if exist {
 		updateSubscribe(w, r, subscribeID, req)
 	} else {
@@ -59,7 +59,7 @@ func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, req subscribeRequest) {
-	ds, err := dataAccess.DA.Get(subscribeID)
+	ds, err := dataaccess.DA.Get(subscribeID)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
@@ -73,9 +73,14 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 		ds.PushAuth,
 	)
 
+	if err != nil {
+		ErrorResponse(w, r, http.StatusServiceUnavailable, err)
+		return
+	}
+
 	// Data Set
 	now := time.Now().Unix()
-	err = dataAccess.DA.Set(subscribeID, dataAccess.DataSet{
+	err = dataaccess.DA.Set(subscribeID, dataaccess.DataSet{
 		SubscribeID:       subscribeID,
 		UserID:            ds.UserID,
 		Username:          ds.Username,
@@ -137,7 +142,7 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 
 	// Data Set
 	now := time.Now().Unix()
-	err = dataAccess.DA.Set(subscribeID, dataAccess.DataSet{
+	err = dataaccess.DA.Set(subscribeID, dataaccess.DataSet{
 		SubscribeID:       subscribeID,
 		UserID:            id,
 		Username:          username,
@@ -176,7 +181,7 @@ func makeHMAC(msg, key string) string {
 func makeEndpoints(subscribeID string) string {
 	endpoints := setting.S.BaseURL + "api/v1/webpush/" + subscribeID
 	if setting.S.BaseURL == "" {
-		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush/%s", setting.S.ApiHost, setting.S.ApiPort, subscribeID)
+		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush/%s", setting.S.APIHost, setting.S.APIPort, subscribeID)
 	}
 	return endpoints
 }

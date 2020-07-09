@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/dataaccess"
 	"github.com/potproject/ikuradon-salmon/endpoints"
 	"github.com/potproject/ikuradon-salmon/setting"
 )
@@ -21,13 +21,13 @@ func main() {
 	flag.Parse()
 
 	if setting.S.UseRedis {
-		dataAccess.SetRedis()
+		dataaccess.SetRedis()
 	} else {
-		dataAccess.SetLevel("data/level")
+		dataaccess.SetLevel("data/level")
 	}
 
 	if *list {
-		p, err := dataAccess.DA.ListAll()
+		p, err := dataaccess.DA.ListAll()
 		if err != nil {
 			os.Exit(1)
 		}
@@ -45,7 +45,7 @@ func main() {
 	router.HandleFunc("/api/v1/subscribe", endpoints.PostSubscribe).Methods("POST")
 	router.HandleFunc("/api/v1/unsubscribe", endpoints.PostUnsubscribe).Methods("POST")
 	router.HandleFunc("/api/v1/webpush/{subscribeID}", endpoints.PostWebPush).Methods("POST")
-	domain := fmt.Sprintf("%s:%d", setting.S.ApiHost, setting.S.ApiPort)
+	domain := fmt.Sprintf("%s:%d", setting.S.APIHost, setting.S.APIPort)
 	realURL := "http://" + domain + "/"
 	if setting.S.BaseURL != "" {
 		realURL = setting.S.BaseURL

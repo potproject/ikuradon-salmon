@@ -12,7 +12,7 @@ import (
 
 	ece "github.com/crow-misia/http-ece"
 	"github.com/gorilla/mux"
-	"github.com/potproject/ikuradon-salmon/dataAccess"
+	"github.com/potproject/ikuradon-salmon/dataaccess"
 	"github.com/potproject/ikuradon-salmon/network"
 	"github.com/potproject/ikuradon-salmon/notification"
 )
@@ -85,7 +85,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 	// AuthSecret
 	// PrivateKey
 	// ExponentPushToken
-	check, errDB := dataAccess.DA.Has(p.SubscribeID)
+	check, errDB := dataaccess.DA.Has(p.SubscribeID)
 	if errDB != nil {
 		err = errDB
 		return
@@ -94,7 +94,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 		err = errors.New("NotFound")
 		return
 	}
-	ds, errDB := dataAccess.DA.Get(p.SubscribeID)
+	ds, errDB := dataaccess.DA.Get(p.SubscribeID)
 	if errDB != nil {
 		err = errDB
 		return
