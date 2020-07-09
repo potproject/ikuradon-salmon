@@ -1,5 +1,7 @@
 # ikuradon-salmon
 
+![Go Report Card](https://goreportcard.com/badge/github.com/potproject/ikuradon-salmon)](https://goreportcard.com/report/github.com/potproject/ikuradon-salmon)
+
 __!!Work In Progress!!__
 
 [ikuradon](https://github.com/potproject/ikuradon) Push Server
