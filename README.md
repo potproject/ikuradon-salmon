@@ -2,8 +2,6 @@
 
 ![Go Report Card](https://goreportcard.com/badge/github.com/potproject/ikuradon-salmon)
 
-__!!Work In Progress!!__
-
 [ikuradon](https://github.com/potproject/ikuradon) Push Server
 
 ## Architecture
