@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  - GO111MODULE=on
+  GO111MODULE: on
 
 jobs:
 
