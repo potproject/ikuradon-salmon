@@ -10,6 +10,7 @@ require (
 	github.com/go-redis/redis/v8 v8.0.0-beta.3
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/mux v1.7.4
+	github.com/jarcoal/httpmock v1.0.6
 	github.com/joho/godotenv v1.3.0
 	github.com/philippgille/gokv v0.6.0 // indirect
 	github.com/philippgille/gokv/bbolt v0.6.0 // indirect
