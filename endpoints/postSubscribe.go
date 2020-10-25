@@ -117,10 +117,9 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
 		return
 	}
+
 	// AuthSecret = Base64 encoded string of 16 bytes of random data.
-	authSecret := make([]byte, 16)
-	rand.Read(authSecret)
-	auth := base64.RawURLEncoding.EncodeToString([]byte(authSecret))
+	auth := generateAuthSecret()
 
 	// Web Push API Subscribing
 	// generate VAPID Key
@@ -184,4 +183,12 @@ func makeEndpoints(subscribeID string) string {
 		endpoints = fmt.Sprintf("https://%s:%d/api/v1/webpush/%s", setting.S.APIHost, setting.S.APIPort, subscribeID)
 	}
 	return endpoints
+}
+
+// generateAuthSecret generating Base64 encoded string of 16 bytes of random data.
+func generateAuthSecret() string {
+	authSecret := make([]byte, 16)
+	rand.Read(authSecret)
+	auth := base64.RawURLEncoding.EncodeToString([]byte(authSecret))
+	return auth
 }

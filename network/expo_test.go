@@ -23,10 +23,7 @@ func TestPushExpoSuccess(t *testing.T) {
 					},
 				},
 			})
-			if err != nil {
-				return httpmock.NewStringResponse(500, ""), nil
-			}
-			return resp, nil
+			return resp, err
 		},
 	)
 	n := notification.N{}
