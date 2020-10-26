@@ -16,14 +16,13 @@ func TestPushExpoSuccess(t *testing.T) {
 	url := expoURL + pushExpoEndpoints
 	httpmock.RegisterResponder("POST", url,
 		func(req *http.Request) (*http.Response, error) {
-			resp, err := httpmock.NewJsonResponse(200, map[string]interface{}{
+			return httpmock.NewJsonResponse(200, map[string]interface{}{
 				"data": map[string]interface{}{
 					"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX": map[string]interface{}{
 						"status": "ok",
 					},
 				},
 			})
-			return resp, err
 		},
 	)
 	n := notification.N{}

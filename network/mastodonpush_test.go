@@ -38,8 +38,7 @@ func TestPushSubscribeMastodonSuccess(t *testing.T) {
 	}
 	httpmock.RegisterResponder("POST", url,
 		func(req *http.Request) (*http.Response, error) {
-			resp, err := httpmock.NewJsonResponse(200, rps)
-			return resp, err
+			return httpmock.NewJsonResponse(200, rps)
 		},
 	)
 	resp, err := PushSubscribeMastodon(
@@ -105,8 +104,7 @@ func TestPushSubscribeMastodonJSONParseError(t *testing.T) {
 	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMastodonEndpoints)
 	httpmock.RegisterResponder("POST", url,
 		func(req *http.Request) (*http.Response, error) {
-			resp, err := httpmock.NewJsonResponse(200, "a")
-			return resp, err
+			return httpmock.NewJsonResponse(200, "a")
 		},
 	)
 	_, err := PushSubscribeMastodon(
@@ -118,5 +116,52 @@ func TestPushSubscribeMastodonJSONParseError(t *testing.T) {
 	)
 	if err == nil || err.Error() != "json: cannot unmarshal string into Go value of type network.ResPushSubscribe" {
 		t.Error("invaild json Parse")
+	}
+}
+
+func TestPushUnsubscribeMastodonSuccess(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMastodonEndpoints)
+	httpmock.RegisterResponder("DELETE", url,
+		func(req *http.Request) (*http.Response, error) {
+			return httpmock.NewJsonResponse(200, map[string]interface{}{
+				"status": "ok",
+			})
+		},
+	)
+	err := PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPushUnsubscribeMastodonServerError(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMastodonEndpoints)
+	httpmock.RegisterResponder("DELETE", url,
+		func(req *http.Request) (*http.Response, error) {
+			return httpmock.NewJsonResponse(500, "")
+		},
+	)
+	err := PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	if err == nil {
+		t.Error("invaild status")
+	}
+}
+
+func TestPushUnsubscribeMastodonClientError(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMastodonEndpoints)
+	httpmock.RegisterResponder("DELETE", url,
+		func(req *http.Request) (*http.Response, error) {
+			return nil, fmt.Errorf("Client Err")
+		},
+	)
+	err := PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	if err == nil {
+		t.Error("invaild status")
 	}
 }
