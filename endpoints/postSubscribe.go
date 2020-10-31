@@ -171,12 +171,14 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 	w.Write(res)
 }
 
+// makeHMAC generating HMAC (Digest Algorithm: SHA-256)
 func makeHMAC(msg, key string) string {
 	mac := hmac.New(sha256.New, []byte(key))
 	mac.Write([]byte(msg))
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
+// makeEndpoints generaing WebPush Endpoint
 func makeEndpoints(subscribeID string) string {
 	endpoints := setting.S.BaseURL + "api/v1/webpush/" + subscribeID
 	if setting.S.BaseURL == "" {
