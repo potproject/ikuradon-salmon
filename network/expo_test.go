@@ -26,7 +26,8 @@ func TestPushExpoSuccess(t *testing.T) {
 		},
 	)
 	n := notification.N{}
-	err := PushExpo("Expo[xxxxxxxxx]", n)
+	e := Expo{}
+	err := e.PushExpo("Expo[xxxxxxxxx]", n)
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,7 +44,8 @@ func TestPushExpoServerError(t *testing.T) {
 		},
 	)
 	n := notification.N{}
-	err := PushExpo("Expo[xxxxxxxxx]", n)
+	e := Expo{}
+	err := e.PushExpo("Expo[xxxxxxxxx]", n)
 	if err == nil {
 		t.Error("invaild status")
 	}
@@ -60,7 +62,8 @@ func TestPushExpoClientError(t *testing.T) {
 		},
 	)
 	n := notification.N{}
-	err := PushExpo("Expo[xxxxxxxxx]", n)
+	e := Expo{}
+	err := e.PushExpo("Expo[xxxxxxxxx]", n)
 	if err == nil {
 		t.Error("invaild status")
 	}

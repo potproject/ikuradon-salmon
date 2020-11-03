@@ -10,6 +10,16 @@ import (
 	"github.com/potproject/ikuradon-salmon/notification"
 )
 
+// ExpoInterface Expo Backend Server JSON-API Access Interface
+type ExpoInterface interface {
+	PushExpo(exponentPushToken string, data notification.N) error
+}
+
+// Expo  Expo Backend Server JSON-API Access Interface
+type Expo struct {
+	ExpoInterface
+}
+
 const expoURL = "https://exp.host"
 const pushExpoEndpoints = "/--/api/v2/push/send"
 
@@ -29,7 +39,7 @@ type message struct {
 }
 
 // PushExpo Sending Expo Backend Server
-func PushExpo(exponentPushToken string, data notification.N) error {
+func (m Expo) PushExpo(exponentPushToken string, data notification.N) error {
 	url := expoURL + pushExpoEndpoints
 	message := message{
 		To:    exponentPushToken,

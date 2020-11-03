@@ -38,7 +38,8 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Deleting Mastodon Server
-	_ = network.PushUnsubscribeMastodon(
+	mp := network.MastodonPush{}
+	_ = mp.PushUnsubscribeMastodon(
 		req.Domain,
 		req.AccessToken,
 	)

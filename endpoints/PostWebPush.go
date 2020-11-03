@@ -141,6 +141,7 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	err = network.PushExpo(p.ExponentPushToken, n)
+	e := network.Expo{}
+	err = e.PushExpo(p.ExponentPushToken, n)
 	w.WriteHeader(http.StatusOK)
 }

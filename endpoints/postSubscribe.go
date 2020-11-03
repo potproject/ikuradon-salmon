@@ -65,7 +65,8 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 		return
 	}
 	endpoints := makeEndpoints(subscribeID)
-	rps, err := network.PushSubscribeMastodon(
+	mp := network.MastodonPush{}
+	rps, err := mp.PushSubscribeMastodon(
 		req.Domain,
 		req.AccessToken,
 		endpoints,
@@ -112,7 +113,8 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 
 func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, req subscribeRequest) {
 	// Mastodon Vertify
-	id, username, err := network.VerifyMastodon(req.Domain, req.AccessToken)
+	m := network.Mastodon{}
+	id, username, err := m.VerifyMastodon(req.Domain, req.AccessToken)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
 		return
@@ -126,8 +128,8 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 	privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
 
 	endpoints := makeEndpoints(subscribeID)
-
-	rps, err := network.PushSubscribeMastodon(
+	mp := network.MastodonPush{}
+	rps, err := mp.PushSubscribeMastodon(
 		req.Domain,
 		req.AccessToken,
 		endpoints,

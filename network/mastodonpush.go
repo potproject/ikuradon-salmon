@@ -11,6 +11,17 @@ import (
 
 const pushSubscribeMastodonEndpoints = "/api/v1/push/subscription"
 
+// MastodonPushInterface Mastodon Push Backend Server JSON-API Access Interface
+type MastodonPushInterface interface {
+	PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoint string, subscriptionKeysP256dh string, subscriptionKeysAuth string) (ResPushSubscribe, error)
+	PushUnsubscribeMastodon(domain string, accessToken string) error
+}
+
+// MastodonPush Mastodon Push Backend Server JSON-API Access Interface
+type MastodonPush struct {
+	MastodonPushInterface
+}
+
 // ResPushSubscribe Mastodon POST:/api/v1/push/subscription Response
 type ResPushSubscribe struct {
 	ID       int64  `json:"id"`
@@ -27,7 +38,7 @@ type ResPushSubscribe struct {
 
 // PushSubscribeMastodon Subscribe to push notifications
 // See: https://docs.joinmastodon.org/methods/notifications/push/
-func PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoint string, subscriptionKeysP256dh string, subscriptionKeysAuth string) (ResPushSubscribe, error) {
+func (mp MastodonPush) PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoint string, subscriptionKeysP256dh string, subscriptionKeysAuth string) (ResPushSubscribe, error) {
 	endpoints := fmt.Sprintf("https://%s%s", domain, pushSubscribeMastodonEndpoints)
 	values := url.Values{}
 	values.Set("subscription[endpoint]", subscriptionEndpoint)
@@ -68,7 +79,7 @@ func PushSubscribeMastodon(domain string, accessToken string, subscriptionEndpoi
 
 // PushUnsubscribeMastodon Remove current subscription
 // See: https://docs.joinmastodon.org/methods/notifications/push/
-func PushUnsubscribeMastodon(domain string, accessToken string) error {
+func (mp MastodonPush) PushUnsubscribeMastodon(domain string, accessToken string) error {
 	endpoints := fmt.Sprintf("https://%s%s", domain, pushSubscribeMastodonEndpoints)
 	req, _ := http.NewRequest("DELETE", endpoints, nil)
 

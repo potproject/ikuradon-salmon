@@ -41,7 +41,8 @@ func TestPushSubscribeMastodonSuccess(t *testing.T) {
 			return httpmock.NewJsonResponse(200, rps)
 		},
 	)
-	resp, err := PushSubscribeMastodon(
+	mp := MastodonPush{}
+	resp, err := mp.PushSubscribeMastodon(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
@@ -65,7 +66,8 @@ func TestPushSubscribeMastodonServerError(t *testing.T) {
 			return httpmock.NewStringResponse(500, ""), nil
 		},
 	)
-	_, err := PushSubscribeMastodon(
+	mp := MastodonPush{}
+	_, err := mp.PushSubscribeMastodon(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
@@ -86,7 +88,8 @@ func TestPushSubscribeMastodonClientError(t *testing.T) {
 			return nil, fmt.Errorf("Client Err")
 		},
 	)
-	_, err := PushSubscribeMastodon(
+	mp := MastodonPush{}
+	_, err := mp.PushSubscribeMastodon(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
@@ -107,7 +110,8 @@ func TestPushSubscribeMastodonJSONParseError(t *testing.T) {
 			return httpmock.NewJsonResponse(200, "a")
 		},
 	)
-	_, err := PushSubscribeMastodon(
+	mp := MastodonPush{}
+	_, err := mp.PushSubscribeMastodon(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
@@ -130,7 +134,8 @@ func TestPushUnsubscribeMastodonSuccess(t *testing.T) {
 			})
 		},
 	)
-	err := PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	mp := MastodonPush{}
+	err := mp.PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
 	if err != nil {
 		t.Error(err)
 	}
@@ -145,7 +150,8 @@ func TestPushUnsubscribeMastodonServerError(t *testing.T) {
 			return httpmock.NewJsonResponse(500, "")
 		},
 	)
-	err := PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	mp := MastodonPush{}
+	err := mp.PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
 	if err == nil {
 		t.Error("invaild status")
 	}
@@ -160,7 +166,8 @@ func TestPushUnsubscribeMastodonClientError(t *testing.T) {
 			return nil, fmt.Errorf("Client Err")
 		},
 	)
-	err := PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	mp := MastodonPush{}
+	err := mp.PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
 	if err == nil {
 		t.Error("invaild status")
 	}
