@@ -53,14 +53,20 @@ func TestSetHasGetDeleteListAllClose(t *testing.T) {
 		t.Errorf("Get: notExist NoErr")
 	}
 
-	// Delete
-	DA.Delete("key")
-
 	// ListAll
 	p, _ := DA.ListAll()
-	if !reflect.DeepEqual(p, []param{}) {
-		t.Errorf("Get: Invaild Param: %v %v", p, []param{})
+	listExp := []param{
+		param{
+			Key:   "key",
+			Value: act,
+		},
 	}
+	if !reflect.DeepEqual(p, listExp) {
+		t.Errorf("Get: Invaild Param: %v %v", p, listExp)
+	}
+
+	// Delete
+	DA.Delete("key")
 
 	// Close
 	if DA.Close() != nil {
