@@ -57,10 +57,16 @@ func TestSetHasGetDeleteListAllCloseRedis(t *testing.T) {
 	}
 
 	// ListAll
-	p, _ := DA.ListAll()
+	listAllkey := []string{"keyl"}
+	mock.ExpectKeys("*").SetVal(listAllkey)
+	mock.ExpectGet("keyl").SetVal(string(jact))
+	p, err := DA.ListAll()
+	if err != nil {
+		t.Error("ListAll:", err)
+	}
 	listExp := []param{
-		param{
-			Key:   "key",
+		{
+			Key:   "keyl",
 			Value: act,
 		},
 	}

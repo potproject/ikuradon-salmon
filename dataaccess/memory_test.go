@@ -56,7 +56,7 @@ func TestSetHasGetDeleteListAllClose(t *testing.T) {
 	// ListAll
 	p, _ := DA.ListAll()
 	listExp := []param{
-		param{
+		{
 			Key:   "key",
 			Value: act,
 		},
