@@ -41,7 +41,7 @@ func (da dataAccessRedis) Get(key string) (DataSet, error) {
 	var ds DataSet
 	ctxt, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	data, err := da.client.Get(ctxt, "key").Result()
+	data, err := da.client.Get(ctxt, key).Result()
 	if err != nil {
 		return ds, err
 	}
@@ -83,6 +83,20 @@ func (da dataAccessRedis) Delete(key string) error {
 // TODO
 func (da dataAccessRedis) ListAll() ([]param, error) {
 	p := []param{}
+	ctxt, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	keys, err := da.client.Keys(ctxt, "*").Result()
+	if err != nil {
+		return p, err
+	}
+	for _, key := range keys {
+		d, errGet := da.Get(key)
+		if errGet != nil {
+			return p, errGet
+		}
+		p = append(p, param{Key: key, Value: d})
+	}
+
 	return p, nil
 }
 

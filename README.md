@@ -12,6 +12,10 @@ Mastodon Web Push API Documents: https://docs.joinmastodon.org/methods/notificat
 
 Expo Push Notifications Documents: https://docs.expo.io/guides/push-notifications/
 
+## Support Database
+* levelDB (Default Internal Database)
+* Redis (External Database)
+
 ## Security
 
 ikuradon-salmonは、暗号化されたコンテンツを複合し、Expo サーバーに送信する仕様になっています。
