@@ -20,13 +20,8 @@ func TestSetHasGetDeleteListAllClose(t *testing.T) {
 	}
 	act := DataSet{
 		SubscribeID:       "ABCDEFG123456",
-		UserID:            "100200300",
-		Username:          "UserName",
-		Domain:            "server.mastodon.net",
-		AccessToken:       "AccessToken",
 		ExponentPushToken: "Expo[xxxxxx]",
 		PushPrivateKey:    "PushPrivateKey",
-		PushPublicKey:     "PushPublicKey",
 		PushAuth:          "PushAuth",
 		ServerKey:         "ServerKey",
 		CreatedAt:         1600000000,
@@ -56,7 +51,7 @@ func TestSetHasGetDeleteListAllClose(t *testing.T) {
 	// ListAll
 	p, _ := DA.ListAll()
 	listExp := []param{
-		param{
+		{
 			Key:   "key",
 			Value: act,
 		},

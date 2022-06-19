@@ -12,13 +12,8 @@ func TestBolt(t *testing.T) {
 	SetBolt(dbName)
 	d := DataSet{
 		SubscribeID:       "12",
-		UserID:            "23",
-		Username:          "test",
-		Domain:            "test.com",
-		AccessToken:       "asdfgh",
 		ExponentPushToken: "qwerty",
 		PushPrivateKey:    "zxcvbn",
-		PushPublicKey:     "123456",
 		PushAuth:          "0987654321",
 		ServerKey:         "qazwsc",
 		CreatedAt:         123,

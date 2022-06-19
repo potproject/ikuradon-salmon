@@ -52,13 +52,8 @@ func TestGetID200(t *testing.T) {
 	defer dataaccess.DA.Close()
 	dataaccess.DA.Set("12F34D56C78B90A", dataaccess.DataSet{
 		SubscribeID:       "12F34D56C78B90A",
-		UserID:            "1234567890",
-		Username:          "UserName",
-		Domain:            "server.mastodon.net",
-		AccessToken:       "AccessToken",
 		ExponentPushToken: "Expo[xxxxxx]",
 		PushPrivateKey:    "PushPrivateKey",
-		PushPublicKey:     "PushPublicKey",
 		PushAuth:          "PushAuth",
 		ServerKey:         "ServerKey",
 		CreatedAt:         1600000000,
