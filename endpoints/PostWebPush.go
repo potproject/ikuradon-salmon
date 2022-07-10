@@ -93,7 +93,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 			ece.WithDh(p.DH),
 		)
 	} else {
-		dh, _ := base64.RawURLEncoding.DecodeString(ds.ServerKey)
+		dh, _ := base64.RawURLEncoding.DecodeString(ds.PushPublicKey)
 		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
 			ece.WithEncoding(p.ContentEncoding),
 			ece.WithAuthSecret(p.AuthSecret),
