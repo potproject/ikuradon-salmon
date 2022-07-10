@@ -18,7 +18,7 @@ func TestPushSubscribeMastodonSuccess(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMastodonEndpoints)
-	rps := ResPushSubscribe{
+	rps := ResPushSubscribeMastodon{
 		ID:       100200300,
 		Endpoint: mastodonPushTestEndpoints,
 		Alerts: struct {
@@ -42,14 +42,14 @@ func TestPushSubscribeMastodonSuccess(t *testing.T) {
 		},
 	)
 	mp := MastodonPush{}
-	resp, err := mp.PushSubscribeMastodon(
+	resp, err := mp.PushSubscribe(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
 		mastodonPushTestPrivateKey,
 		mastodonPushTestAuth,
 	)
-	if resp != rps {
+	if resp != rps.ServerKey {
 		t.Error("Invalid Response")
 	}
 	if err != nil {
@@ -67,7 +67,7 @@ func TestPushSubscribeMastodonServerError(t *testing.T) {
 		},
 	)
 	mp := MastodonPush{}
-	_, err := mp.PushSubscribeMastodon(
+	_, err := mp.PushSubscribe(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
@@ -82,14 +82,14 @@ func TestPushSubscribeMastodonServerError(t *testing.T) {
 func TestPushSubscribeMastodonClientError(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
-	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMastodonEndpoints)
+	url := fmt.Sprintf("https://%s%s", mastodonPushTestDomain, pushSubscribeMisskeyEndpoints)
 	httpmock.RegisterResponder("POST", url,
 		func(req *http.Request) (*http.Response, error) {
 			return nil, fmt.Errorf("Client Err")
 		},
 	)
 	mp := MastodonPush{}
-	_, err := mp.PushSubscribeMastodon(
+	_, err := mp.PushSubscribe(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
@@ -111,14 +111,14 @@ func TestPushSubscribeMastodonJSONParseError(t *testing.T) {
 		},
 	)
 	mp := MastodonPush{}
-	_, err := mp.PushSubscribeMastodon(
+	_, err := mp.PushSubscribe(
 		mastodonPushTestDomain,
 		mastodonPushTestAccessToken,
 		mastodonPushTestEndpoints,
 		mastodonPushTestPrivateKey,
 		mastodonPushTestAuth,
 	)
-	if err == nil || err.Error() != "json: cannot unmarshal string into Go value of type network.ResPushSubscribe" {
+	if err == nil {
 		t.Error("invaild json Parse")
 	}
 }
@@ -135,7 +135,7 @@ func TestPushUnsubscribeMastodonSuccess(t *testing.T) {
 		},
 	)
 	mp := MastodonPush{}
-	err := mp.PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	err := mp.PushUnsubscribe(mastodonPushTestDomain, mastodonPushTestAccessToken, mastodonPushTestEndpoints)
 	if err != nil {
 		t.Error(err)
 	}
@@ -151,7 +151,7 @@ func TestPushUnsubscribeMastodonServerError(t *testing.T) {
 		},
 	)
 	mp := MastodonPush{}
-	err := mp.PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	err := mp.PushUnsubscribe(mastodonPushTestDomain, mastodonPushTestAccessToken, mastodonPushTestEndpoints)
 	if err == nil {
 		t.Error("invaild status")
 	}
@@ -167,7 +167,7 @@ func TestPushUnsubscribeMastodonClientError(t *testing.T) {
 		},
 	)
 	mp := MastodonPush{}
-	err := mp.PushUnsubscribeMastodon(mastodonPushTestDomain, mastodonPushTestAccessToken)
+	err := mp.PushUnsubscribe(mastodonPushTestDomain, mastodonPushTestAccessToken, mastodonPushTestEndpoints)
 	if err == nil {
 		t.Error("invaild status")
 	}

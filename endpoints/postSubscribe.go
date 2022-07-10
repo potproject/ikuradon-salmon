@@ -19,6 +19,7 @@ import (
 )
 
 type subscribeRequest struct {
+	Sns               string // sns
 	Domain            string // domain
 	AccessToken       string // access_token
 	ExponentPushToken string // exponent_push_token
@@ -38,6 +39,7 @@ type subscribeResponseData struct {
 // PostSubscribe post subscribe
 func PostSubscribe(w http.ResponseWriter, r *http.Request) {
 	req := subscribeRequest{
+		Sns:               r.FormValue("sns"),
 		Domain:            r.FormValue("domain"),
 		AccessToken:       r.FormValue("access_token"),
 		ExponentPushToken: r.FormValue("exponent_push_token"),
@@ -65,8 +67,14 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 		return
 	}
 	endpoints := makeEndpoints(subscribeID)
-	mp := network.MastodonPush{}
-	rps, err := mp.PushSubscribeMastodon(
+	var sp network.SNSPushInterface
+	if req.Sns == "misskey" {
+		sp = network.MisskeyPush{}
+	} else {
+		sp = network.MastodonPush{}
+	}
+
+	serverKey, err := sp.PushSubscribe(
 		req.Domain,
 		req.AccessToken,
 		endpoints,
@@ -91,7 +99,7 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 		PushPrivateKey:    ds.PushPrivateKey,
 		PushPublicKey:     ds.PushPublicKey,
 		PushAuth:          ds.PushAuth,
-		ServerKey:         rps.ServerKey,
+		ServerKey:         serverKey,
 		CreatedAt:         ds.CreatedAt,
 		LastUpdatedAt:     now,
 	})
@@ -112,9 +120,14 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 }
 
 func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, req subscribeRequest) {
-	// Mastodon Vertify
-	m := network.Mastodon{}
-	id, username, err := m.VerifyMastodon(req.Domain, req.AccessToken)
+	// Mastodon/Misskey Vertify
+	var s network.SnsInterface
+	if req.Sns == "misskey" {
+		s = network.Misskey{}
+	} else {
+		s = network.Mastodon{}
+	}
+	id, username, err := s.Verify(req.Domain, req.AccessToken)
 	if err != nil {
 		ErrorResponse(w, r, http.StatusServiceUnavailable, errors.New("Mastodon Server Unavailable: "+err.Error()))
 		return
@@ -128,8 +141,13 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 	privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
 
 	endpoints := makeEndpoints(subscribeID)
-	mp := network.MastodonPush{}
-	rps, err := mp.PushSubscribeMastodon(
+	var sp network.SNSPushInterface
+	if req.Sns == "misskey" {
+		sp = network.MisskeyPush{}
+	} else {
+		sp = network.MastodonPush{}
+	}
+	serverKey, err := sp.PushSubscribe(
 		req.Domain,
 		req.AccessToken,
 		endpoints,
@@ -153,7 +171,7 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 		PushPrivateKey:    privateKey,
 		PushPublicKey:     publicKey,
 		PushAuth:          auth,
-		ServerKey:         rps.ServerKey,
+		ServerKey:         serverKey,
 		CreatedAt:         now,
 		LastUpdatedAt:     now,
 	})

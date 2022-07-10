@@ -17,7 +17,7 @@ func TestVerifyMastodonSuccess(t *testing.T) {
 	url := fmt.Sprintf("https://%s%s", mastodonTestDomain, verifyMastodonEndpoints)
 	httpmock.RegisterResponder("GET", url,
 		func(req *http.Request) (*http.Response, error) {
-			resv := ResVerify{
+			resv := ResVerifyMastodon{
 				ID:       "100200300",
 				Username: "testuser",
 			}
@@ -25,7 +25,7 @@ func TestVerifyMastodonSuccess(t *testing.T) {
 		},
 	)
 	m := Mastodon{}
-	id, uName, err := m.VerifyMastodon(mastodonTestDomain, mastodonTestAccessToken)
+	id, uName, err := m.Verify(mastodonTestDomain, mastodonTestAccessToken)
 	if id != "100200300" || uName != "testuser" {
 		t.Error("invalid ID/User")
 	}
@@ -44,7 +44,7 @@ func TestVerifyMastodonServerError(t *testing.T) {
 		},
 	)
 	m := Mastodon{}
-	_, _, err := m.VerifyMastodon(mastodonTestDomain, mastodonTestAccessToken)
+	_, _, err := m.Verify(mastodonTestDomain, mastodonTestAccessToken)
 	if err == nil {
 		t.Error("invaild status")
 	}
@@ -60,7 +60,7 @@ func TestVerifyMastodonClientError(t *testing.T) {
 		},
 	)
 	m := Mastodon{}
-	_, _, err := m.VerifyMastodon(mastodonTestDomain, mastodonTestAccessToken)
+	_, _, err := m.Verify(mastodonTestDomain, mastodonTestAccessToken)
 	if err == nil {
 		t.Error("invaild status")
 	}
@@ -76,8 +76,8 @@ func TestVerifyMastodonJSONParseError(t *testing.T) {
 		},
 	)
 	m := Mastodon{}
-	_, _, err := m.VerifyMastodon(mastodonTestDomain, mastodonTestAccessToken)
-	if err == nil || err.Error() != "json: cannot unmarshal string into Go value of type network.ResVerify" {
+	_, _, err := m.Verify(mastodonTestDomain, mastodonTestAccessToken)
+	if err == nil {
 		t.Error("invaild json Parse")
 	}
 }

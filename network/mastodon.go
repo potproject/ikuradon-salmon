@@ -14,24 +14,24 @@ const notificationsMastodonEndpoints = "/api/v1/notifications"
 
 const mastodonTimeout = 30 * time.Second
 
-// MastodonInterface Mastodon Backend Server JSON-API Access Interface
-type MastodonInterface interface {
-	VerifyMastodon(domain string, accessToken string) (string, string, error)
+// SnsInterface Mastodon/Misskey Backend Server JSON-API Access Interface
+type SnsInterface interface {
+	Verify(domain string, accessToken string) (string, string, error)
 }
 
 // Mastodon Mastodon Backend Server JSON-API Access Interface
 type Mastodon struct {
-	MastodonInterface
+	SnsInterface
 }
 
-// ResVerify Mastodon id and username Response
-type ResVerify struct {
+// ResVerifyMastodon Mastodon id and username Response
+type ResVerifyMastodon struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 }
 
 // VerifyMastodon GET:/api/v1/verify_credentials Mastodon Server
-func (m Mastodon) VerifyMastodon(domain string, accessToken string) (string, string, error) {
+func (m Mastodon) Verify(domain string, accessToken string) (string, string, error) {
 	url := fmt.Sprintf("https://%s%s", domain, verifyMastodonEndpoints)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", "application/json")
@@ -51,7 +51,7 @@ func (m Mastodon) VerifyMastodon(domain string, accessToken string) (string, str
 		return "", "", err
 	}
 	defer resp.Body.Close()
-	var rv ResVerify
+	var rv ResVerifyMastodon
 	err = json.Unmarshal(b, &rv)
 	if err != nil {
 		return "", "", err

@@ -52,19 +52,19 @@ paths:
                         example: 'PbnWzSoSP1WBPXYbBsFgZWAj3lmZ23Ljr6i6b9HVIQZiTIthZqKsDbArEPnkJQOk'
                       user_id:
                         type: string
-                        description: 'Mastodon User ID'
+                        description: 'Mastodon/Misskey User ID'
                         example: '1000'
                       username:
                         type: string
-                        description: 'Mastodon User Name'
+                        description: 'Mastodon/Misskey User Name'
                         example: 'username'
                       domain:
                         type: string
-                        description: 'Mastodon Domain'
+                        description: 'Mastodon/Misskey Domain'
                         example: 'mastodon.social'      
                       access_token:
                         type: string
-                        description: 'Mastodon Access Token'
+                        description: 'Mastodon/Misskey Access Token'
                         example: '1OWbZghxxgcFtHwv9Mc4yRlj9U2N5iD3'
                       exponent_push_token:
                         type: string
@@ -113,9 +113,17 @@ paths:
       summary: 'Subscribe to push notifications.'
       parameters:
         -
+          name: sns
+          in: query
+          description: 'SNSType: `mastodon` or `misskey`'
+          required: true
+          schema:
+            type: string
+          example: 'mastodon'
+        -
           name: domain
           in: query
-          description: 'Mastodon Server Domain'
+          description: 'Mastodon/Misskey Server Domain'
           required: true
           schema:
             type: string
@@ -123,7 +131,7 @@ paths:
         -
           name: access_token
           in: query
-          description: 'Mastodon AccessToken'
+          description: 'Mastodon/Misskey AccessToken'
           required: true
           schema:
             type: string
@@ -165,6 +173,14 @@ paths:
     post:
       summary: 'UnSubscribe to push notifications.'
       parameters:
+        -
+          name: sns
+          in: query
+          description: 'SNSType: `mastodon` or `misskey`'
+          required: true
+          schema:
+            type: string
+          example: 'mastodon'
         -
           name: domain
           in: query

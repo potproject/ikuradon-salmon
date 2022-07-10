@@ -13,6 +13,7 @@ import (
 // PostUnsubscribe post unsubscribe
 func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	req := subscribeRequest{
+		Sns:               r.FormValue("sns"),
 		Domain:            r.FormValue("domain"),
 		AccessToken:       r.FormValue("access_token"),
 		ExponentPushToken: r.FormValue("exponent_push_token"),
@@ -37,11 +38,17 @@ func PostUnsubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Deleting Mastodon Server
-	mp := network.MastodonPush{}
-	_ = mp.PushUnsubscribeMastodon(
+	// Deleting Server
+	var sp network.SNSPushInterface
+	if req.Sns == "misskey" {
+		sp = network.MisskeyPush{}
+	} else {
+		sp = network.MastodonPush{}
+	}
+	_ = sp.PushUnsubscribe(
 		req.Domain,
 		req.AccessToken,
+		makeEndpoints(subscribeID),
 	)
 
 	// Deleting DA
