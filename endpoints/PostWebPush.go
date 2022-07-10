@@ -42,7 +42,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 
 	// ContentEncoding
 	headerContentEncoding := r.Header.Get("Content-Encoding")
-	if headerContentEncoding == "aes128gcm" {
+	if strings.ToLower(headerContentEncoding) == "aes128gcm" {
 		p.ContentEncoding = ece.AES128GCM
 	} else {
 		p.ContentEncoding = ece.AESGCM
