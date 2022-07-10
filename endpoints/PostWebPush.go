@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 
 	ece "github.com/crow-misia/http-ece"
@@ -20,12 +19,8 @@ import (
 type pushPayload struct {
 	SubscribeID       string
 	ContentEncoding   ece.ContentEncoding
-	TTL               int
-	ContentType       string
 	Salt              []byte
 	DH                []byte
-	P256ECDSA         []byte
-	JWT               string
 	EncryptedBody     []byte
 	AuthSecret        []byte
 	PrivateKey        []byte
@@ -46,37 +41,22 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 		p.ContentEncoding = ece.AES128GCM
 	} else {
 		p.ContentEncoding = ece.AESGCM
-	}
 
-	// TTL
-	p.TTL, _ = strconv.Atoi(r.Header.Get("Ttl"))
-
-	// ContentType
-	p.ContentType = r.Header.Get("Content-Type")
-
-	// Salt
-	headerEncryption := r.Header.Get("Encryption")
-	if strings.HasPrefix(headerEncryption, "salt=") {
-		salt := headerEncryption[5:]
-		p.Salt, _ = base64.RawURLEncoding.DecodeString(salt)
-	}
-
-	// DH
-	// P256ECDSA
-	headerCryptoKey := r.Header.Get("Crypto-Key")
-	sliceHeaderCryptoKey := strings.Split(headerCryptoKey, ";")
-	for _, ckey := range sliceHeaderCryptoKey {
-		if strings.HasPrefix(ckey, "dh=") {
-			p.DH, _ = base64.RawURLEncoding.DecodeString(ckey[3:])
+		// Salt
+		headerEncryption := r.Header.Get("Encryption")
+		if strings.HasPrefix(headerEncryption, "salt=") {
+			salt := headerEncryption[5:]
+			p.Salt, _ = base64.RawURLEncoding.DecodeString(salt)
 		}
-		if strings.HasPrefix(ckey, "p256ecdsa=") {
-			p.P256ECDSA, _ = base64.RawURLEncoding.DecodeString(ckey[10:])
+
+		// DH
+		headerCryptoKey := r.Header.Get("Crypto-Key")
+		sliceHeaderCryptoKey := strings.Split(headerCryptoKey, ";")
+		for _, ckey := range sliceHeaderCryptoKey {
+			if strings.HasPrefix(ckey, "dh=") {
+				p.DH, _ = base64.RawURLEncoding.DecodeString(ckey[3:])
+			}
 		}
-	}
-	// JWT
-	headerAuthorization := r.Header.Get("Authorization")
-	if strings.HasPrefix(headerAuthorization, "WebPush ") {
-		p.JWT = headerAuthorization[8:]
 	}
 
 	// EncryptedBody
@@ -102,6 +82,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 	p.AuthSecret, _ = base64.RawURLEncoding.DecodeString(ds.PushAuth)
 	p.PrivateKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPrivateKey)
 	p.ExponentPushToken = ds.ExponentPushToken
+
 	var plaintextByte []byte
 	if p.ContentEncoding == ece.AESGCM {
 		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
@@ -112,11 +93,12 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 			ece.WithDh(p.DH),
 		)
 	} else {
+		dh, _ := base64.RawURLEncoding.DecodeString(ds.ServerKey)
 		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
 			ece.WithEncoding(p.ContentEncoding),
 			ece.WithAuthSecret(p.AuthSecret),
 			ece.WithPrivate(p.PrivateKey),
-			ece.WithDh(p.DH),
+			ece.WithDh(dh),
 		)
 	}
 	if err != nil {
