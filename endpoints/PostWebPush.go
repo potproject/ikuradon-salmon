@@ -81,6 +81,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 	}
 	p.AuthSecret, _ = base64.RawURLEncoding.DecodeString(ds.PushAuth)
 	p.PrivateKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPrivateKey)
+
 	p.ExponentPushToken = ds.ExponentPushToken
 
 	var plaintextByte []byte
@@ -93,14 +94,12 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 			ece.WithDh(p.DH),
 		)
 	} else {
-		idlen := p.EncryptedBody[20:21]
-		dh := p.EncryptedBody[21 : 21+uint64(idlen[0])]
-
+		pubKey, _ := base64.RawURLEncoding.DecodeString(ds.PushPublicKey)
 		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
 			ece.WithEncoding(p.ContentEncoding),
 			ece.WithAuthSecret(p.AuthSecret),
 			ece.WithPrivate(p.PrivateKey),
-			ece.WithDh(dh),
+			ece.WithDh(pubKey),
 		)
 	}
 	if err != nil {
