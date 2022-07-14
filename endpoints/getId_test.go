@@ -51,6 +51,7 @@ func TestGetID200(t *testing.T) {
 	dataaccess.SetMemory()
 	defer dataaccess.DA.Close()
 	dataaccess.DA.Set("12F34D56C78B90A", dataaccess.DataSet{
+		Sns:               "mastodon",
 		SubscribeID:       "12F34D56C78B90A",
 		UserID:            "1234567890",
 		Username:          "UserName",
@@ -76,7 +77,7 @@ func TestGetID200(t *testing.T) {
 	if resp.Header.Get("Content-Type") != "application/json" {
 		t.Errorf("Content-Type invalid: %s", resp.Header.Get("Content-Type"))
 	}
-	if string(body) != `{"result":true,"data":{"subscribe_id":"12F34D56C78B90A","user_id":"1234567890","username":"UserName","domain":"server.mastodon.net","access_token":"AccessToken","exponent_push_token":"Expo[xxxxxx]","push_private_key":"PushPrivateKey","push_public_key":"PushPublicKey","push_auth":"PushAuth","server_key":"ServerKey","created_at":1600000000,"last_updated_at":1600000000}}` {
+	if string(body) != `{"result":true,"data":{"sns":"mastodon","subscribe_id":"12F34D56C78B90A","user_id":"1234567890","username":"UserName","domain":"server.mastodon.net","access_token":"AccessToken","exponent_push_token":"Expo[xxxxxx]","push_private_key":"PushPrivateKey","push_public_key":"PushPublicKey","push_auth":"PushAuth","server_key":"ServerKey","created_at":1600000000,"last_updated_at":1600000000}}` {
 		t.Errorf("Status Code invalid: %s", string(body))
 	}
 }

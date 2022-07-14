@@ -20,6 +20,7 @@ type param struct {
 
 // DataSet JSON Subscribe Data struct
 type DataSet struct {
+	Sns               string `json:"sns"`
 	SubscribeID       string `json:"subscribe_id"`
 	UserID            string `json:"user_id"`
 	Username          string `json:"username"`

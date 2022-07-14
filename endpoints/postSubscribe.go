@@ -90,6 +90,7 @@ func updateSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string,
 	// Data Set
 	now := time.Now().Unix()
 	err = dataaccess.DA.Set(subscribeID, dataaccess.DataSet{
+		Sns:               req.Sns,
 		SubscribeID:       subscribeID,
 		UserID:            ds.UserID,
 		Username:          ds.Username,
@@ -162,6 +163,7 @@ func newSubscribe(w http.ResponseWriter, r *http.Request, subscribeID string, re
 	// Data Set
 	now := time.Now().Unix()
 	err = dataaccess.DA.Set(subscribeID, dataaccess.DataSet{
+		Sns:               req.Sns,
 		SubscribeID:       subscribeID,
 		UserID:            id,
 		Username:          username,

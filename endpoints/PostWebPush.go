@@ -30,7 +30,7 @@ type pushPayload struct {
 	ExponentPushToken string
 }
 
-func setPayload(r *http.Request) (p pushPayload, err error) {
+func setPayload(r *http.Request) (p pushPayload, sns string, err error) {
 	p = pushPayload{}
 	err = nil
 	// SubscribeID
@@ -81,6 +81,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 		err = errDB
 		return
 	}
+	sns = ds.Sns
 	p.AuthSecret, _ = base64.RawURLEncoding.DecodeString(ds.PushAuth)
 	p.PrivateKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPrivateKey)
 	p.PublicKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPublicKey)
@@ -98,7 +99,6 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 		)
 	} else {
 		plaintextByte, err = rfc8188.Decrypt(p.EncryptedBody, p.PublicKey, p.PrivateKey, p.AuthSecret)
-		fmt.Println(string(plaintextByte))
 	}
 	if err != nil {
 		return
@@ -109,19 +109,25 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 
 // PostWebPush Webpush Endpoint
 func PostWebPush(w http.ResponseWriter, r *http.Request) {
-	p, err := setPayload(r)
+	p, sns, err := setPayload(r)
 	if err != nil {
 		fmt.Println("error Decrypt.", err.Error())
 		ErrorResponse(w, r, http.StatusInternalServerError, err)
 		return
 	}
 	var n notification.N
-	err = json.Unmarshal([]byte(p.PlainText), &n)
-	if err != nil {
-		fmt.Println("error Decrypt.", err.Error())
-		ErrorResponse(w, r, http.StatusInternalServerError, err)
-		return
+	if sns == "misskey" {
+		//misskey migration from notification
+
+	} else {
+		err = json.Unmarshal([]byte(p.PlainText), &n)
+		if err != nil {
+			fmt.Println("error Decrypt.", err.Error())
+			ErrorResponse(w, r, http.StatusInternalServerError, err)
+			return
+		}
 	}
+
 	e := network.Expo{}
 	err = e.PushExpo(p.ExponentPushToken, n)
 	w.WriteHeader(http.StatusOK)
