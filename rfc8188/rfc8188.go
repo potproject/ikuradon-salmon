@@ -19,7 +19,7 @@ func Decrypt(body []byte, public []byte, private []byte, authSecret []byte) ([]b
 	// Create ECDH Public
 
 	p256 := elliptic.P256()
-	pubX, pubY := elliptic.Unmarshal(p256, idlen)
+	pubX, pubY := elliptic.Unmarshal(p256, keyid)
 	sX, _ := p256.ScalarMult(pubX, pubY, private)
 	sharedSecret := sX.Bytes()
 
