@@ -83,8 +83,8 @@ func Decrypt(body []byte, public []byte, private []byte, authSecret []byte) ([]b
 	if err != nil {
 		return []byte{}, err
 	}
-
-	return plain, nil
+	// GCM padding Delete
+	return plain[:len(plain)-1], nil
 }
 
 func HMACSHA256(key, data []byte) []byte {
