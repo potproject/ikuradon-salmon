@@ -14,6 +14,7 @@ import (
 	"github.com/potproject/ikuradon-salmon/dataaccess"
 	"github.com/potproject/ikuradon-salmon/network"
 	"github.com/potproject/ikuradon-salmon/notification"
+	"github.com/potproject/ikuradon-salmon/rfc8188"
 )
 
 type pushPayload struct {
@@ -23,6 +24,7 @@ type pushPayload struct {
 	DH                []byte
 	EncryptedBody     []byte
 	AuthSecret        []byte
+	PublicKey         []byte
 	PrivateKey        []byte
 	PlainText         string
 	ExponentPushToken string
@@ -81,6 +83,7 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 	}
 	p.AuthSecret, _ = base64.RawURLEncoding.DecodeString(ds.PushAuth)
 	p.PrivateKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPrivateKey)
+	p.PublicKey, _ = base64.RawURLEncoding.DecodeString(ds.PushPublicKey)
 
 	p.ExponentPushToken = ds.ExponentPushToken
 
@@ -94,13 +97,8 @@ func setPayload(r *http.Request) (p pushPayload, err error) {
 			ece.WithDh(p.DH),
 		)
 	} else {
-		pubKey, _ := base64.RawURLEncoding.DecodeString(ds.PushPublicKey)
-		plaintextByte, err = ece.Decrypt(p.EncryptedBody,
-			ece.WithEncoding(p.ContentEncoding),
-			ece.WithAuthSecret(p.AuthSecret),
-			ece.WithPrivate(p.PrivateKey),
-			ece.WithDh(pubKey),
-		)
+		plaintextByte, err = rfc8188.Decrypt(p.EncryptedBody, p.PublicKey, p.PrivateKey, p.AuthSecret)
+		fmt.Println(string(plaintextByte))
 	}
 	if err != nil {
 		return
