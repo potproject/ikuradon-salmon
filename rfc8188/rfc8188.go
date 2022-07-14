@@ -6,8 +6,6 @@ import (
 	"crypto/elliptic"
 	"crypto/hmac"
 	"crypto/sha256"
-
-	"github.com/aead/ecdh"
 )
 
 // 参考: https://github.com/pantasystem/Milktea/blob/develop/PushToFCM/webPushDecipher.js
@@ -19,8 +17,11 @@ func Decrypt(body []byte, public []byte, private []byte, authSecret []byte) ([]b
 	content := body[21+uint64(idlen[0]):]
 
 	// Create ECDH Public
-	p256 := ecdh.Generic(elliptic.P256())
-	sharedSecret := p256.ComputeSecret(private, keyid)
+
+	p256 := elliptic.P256()
+	pubX, pubY := p256.ScalarBaseMult(private)
+	sX, _ := p256.ScalarMult(pubX, pubY, private)
+	sharedSecret := sX.Bytes()
 
 	/*
 	  # HKDF-Extract(salt=auth_secret, IKM=ecdh_secret)
