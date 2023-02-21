@@ -14,6 +14,8 @@ func TestSetSetting(t *testing.T) {
 	apiHost := "0.0.0.0"
 	apiPort := 8080
 	useRedis := false
+	deleteOldNotificationDays := 14
+	deleteOldNotificationCron := "0 0 * * *"
 	os.Setenv("APP_NAME", appName)
 	os.Setenv("APP_VERSION", appVersion)
 	os.Setenv("SALT", salt)
@@ -21,6 +23,8 @@ func TestSetSetting(t *testing.T) {
 	os.Setenv("API_HOST", apiHost)
 	os.Setenv("API_PORT", strconv.Itoa(apiPort))
 	os.Setenv("USE_REDIS", "false")
+	os.Setenv("DELETE_OLD_NOTIFICATION_DAYS", strconv.Itoa(deleteOldNotificationDays))
+	os.Setenv("DELETE_OLD_NOTIFICATION_CRON", deleteOldNotificationCron)
 	defer os.Unsetenv("APP_NAME")
 	defer os.Unsetenv("APP_VERSION")
 	defer os.Unsetenv("SALT")
@@ -28,6 +32,8 @@ func TestSetSetting(t *testing.T) {
 	defer os.Unsetenv("API_HOST")
 	defer os.Unsetenv("API_PORT")
 	defer os.Unsetenv("USE_REDIS")
+	defer os.Unsetenv("DELETE_OLD_NOTIFICATION_DAYS")
+	defer os.Unsetenv("DELETE_OLD_NOTIFICATION_CRON")
 	SetSetting()
 	if S.AppName != appName {
 		t.Error(" S.AppName / Actual:" + S.AppName + " Expect:" + appName)
@@ -49,5 +55,11 @@ func TestSetSetting(t *testing.T) {
 	}
 	if S.UseRedis != useRedis {
 		t.Errorf(" S.APIPort / Actual: %t Expect: %t", S.UseRedis, useRedis)
+	}
+	if S.DeleteOldNotificationDays != deleteOldNotificationDays {
+		t.Errorf(" S.DeleteOldNotificationDays / Actual: %d Expect: %d", S.DeleteOldNotificationDays, deleteOldNotificationDays)
+	}
+	if S.DeleteOldNotificationCron != deleteOldNotificationCron {
+		t.Errorf(" S.DeleteOldNotificationCron / Actual: %s Expect: %s", S.DeleteOldNotificationCron, deleteOldNotificationCron)
 	}
 }

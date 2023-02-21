@@ -3,6 +3,7 @@ package dataaccess
 import (
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -68,6 +69,15 @@ func (da dataAccessLevel) ListAll() ([]param, error) {
 	iter.Release()
 	err := iter.Error()
 	return p, err
+}
+
+func (da dataAccessLevel) UpdateDate(key string) error {
+	d, err := da.Get(key)
+	if err != nil {
+		return err
+	}
+	d.LastUpdatedAt = time.Now().Unix()
+	return da.Set(key, d)
 }
 
 func (da dataAccessLevel) Close() error {

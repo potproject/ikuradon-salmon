@@ -8,30 +8,34 @@ import (
 
 // S setting
 var S = setting{
-	AppName:       "ikuradon-salmon",
-	AppVersion:    "unversioned",
-	BaseURL:       "",
-	APIHost:       "0.0.0.0",
-	APIPort:       8080,
-	UseRedis:      false,
-	RedisHost:     "redis",
-	RedisPort:     6379,
-	RedisPassword: "",
-	RedisDatabase: 0,
+	AppName:                   "ikuradon-salmon",
+	AppVersion:                "unversioned",
+	BaseURL:                   "",
+	APIHost:                   "0.0.0.0",
+	APIPort:                   8080,
+	UseRedis:                  false,
+	RedisHost:                 "redis",
+	RedisPort:                 6379,
+	RedisPassword:             "",
+	RedisDatabase:             0,
+	DeleteOldNotificationDays: 14,
+	DeleteOldNotificationCron: "0 0 * * *",
 }
 
 type setting struct {
-	AppName       string
-	AppVersion    string
-	Salt          string
-	BaseURL       string
-	APIHost       string
-	APIPort       uint16
-	UseRedis      bool
-	RedisHost     string
-	RedisPort     uint16
-	RedisPassword string
-	RedisDatabase int
+	AppName                   string
+	AppVersion                string
+	Salt                      string
+	BaseURL                   string
+	APIHost                   string
+	APIPort                   uint16
+	UseRedis                  bool
+	RedisHost                 string
+	RedisPort                 uint16
+	RedisPassword             string
+	RedisDatabase             int
+	DeleteOldNotificationDays int
+	DeleteOldNotificationCron string
 }
 
 // SetSetting Add Setting
@@ -80,5 +84,15 @@ func SetSetting() {
 			log.Fatal(err)
 		}
 		S.RedisDatabase = redisDatabaseint
+	}
+	if deleteOldNotificationDays := os.Getenv("DELETE_OLD_NOTIFICATION_DAYS"); deleteOldNotificationDays != "" {
+		deleteOldNotificationDaysint, err := strconv.Atoi(deleteOldNotificationDays)
+		if err != nil {
+			log.Fatal(err)
+		}
+		S.DeleteOldNotificationDays = deleteOldNotificationDaysint
+	}
+	if deleteOldNotificationCron := os.Getenv("DELETE_OLD_NOTIFICATION_CRON"); deleteOldNotificationCron != "" {
+		S.DeleteOldNotificationCron = deleteOldNotificationCron
 	}
 }

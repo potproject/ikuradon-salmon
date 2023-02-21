@@ -3,6 +3,7 @@ package dataaccess
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestSetMemory(t *testing.T) {
@@ -63,6 +64,17 @@ func TestSetHasGetDeleteListAllClose(t *testing.T) {
 	}
 	if !reflect.DeepEqual(p, listExp) {
 		t.Errorf("Get: Invaild Param: %v %v", p, listExp)
+	}
+
+	// UpdateDate
+	nowTime := time.Now().Unix()
+	DA.UpdateDate("key")
+	upD, err := DA.Get("key")
+	if err != nil {
+		t.Errorf("UpdateDate: Get Err")
+	}
+	if upD.LastUpdatedAt != nowTime {
+		t.Errorf("UpdateDate: Not Updated")
 	}
 
 	// Delete

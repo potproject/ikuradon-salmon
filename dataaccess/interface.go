@@ -8,6 +8,7 @@ type DataAccess interface {
 	Get(key string) (DataSet, error)
 	Has(key string) (bool, error)
 	Set(key string, value DataSet) error
+	UpdateDate(key string) error
 	Delete(key string) error
 	ListAll() ([]param, error)
 	Close() error

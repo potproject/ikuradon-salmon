@@ -2,6 +2,7 @@ package dataaccess
 
 import (
 	"fmt"
+	"time"
 )
 
 type dataAccessMemory struct {
@@ -49,6 +50,15 @@ func (da dataAccessMemory) ListAll() ([]param, error) {
 		})
 	}
 	return p, nil
+}
+
+func (da dataAccessMemory) UpdateDate(key string) error {
+	d, err := da.Get(key)
+	if err != nil {
+		return err
+	}
+	d.LastUpdatedAt = time.Now().Unix()
+	return da.Set(key, d)
 }
 
 func (da dataAccessMemory) Close() error {

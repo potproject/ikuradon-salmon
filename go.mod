@@ -17,5 +17,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/robfig/cron/v3 v3.0.1
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 )

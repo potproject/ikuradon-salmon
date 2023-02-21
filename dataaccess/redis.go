@@ -55,6 +55,15 @@ func (da dataAccessRedis) ListAll() ([]param, error) {
 	return p, nil
 }
 
+func (da dataAccessRedis) UpdateDate(key string) error {
+	d, err := da.Get(key)
+	if err != nil {
+		return err
+	}
+	d.LastUpdatedAt = time.Now().Unix()
+	return da.Set(key, d)
+}
+
 func (da dataAccessRedis) Close() error {
 	return da.client.Close()
 }

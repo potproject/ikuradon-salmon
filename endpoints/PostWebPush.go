@@ -131,5 +131,6 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 
 	e := network.Expo{}
 	e.PushExpo(p.ExponentPushToken, n)
+	dataaccess.DA.UpdateDate(p.SubscribeID)
 	w.WriteHeader(http.StatusOK)
 }

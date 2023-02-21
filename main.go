@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/potproject/ikuradon-salmon/cron"
 	"github.com/potproject/ikuradon-salmon/dataaccess"
 	"github.com/potproject/ikuradon-salmon/endpoints"
 	"github.com/potproject/ikuradon-salmon/setting"
@@ -36,6 +37,8 @@ func main() {
 		}
 		return
 	}
+
+	cron.DeleteOldNotificationsCron()
 
 	router := mux.NewRouter()
 	// エンドポイント
