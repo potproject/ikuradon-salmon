@@ -13,17 +13,17 @@ services:
           - ./data:/data
     ports:
       - "8080:8080"
-#    depends_on:
-#      - redis
-#  redis:
-#    restart: always
-#    image: redis:6.0-alpine
-#    networks:
-#      - internal_network
-#    healthcheck:
-#      test: ["CMD", "redis-cli", "ping"]
-#    volumes:
-#      - ./data/redis:/data
+    depends_on:
+      - redis
+  redis:
+    restart: always
+    image: redis:6.0-alpine
+    networks:
+      - internal_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+    volumes:
+      - ./data/redis:/data
 
 networks:
   external_network:

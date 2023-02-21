@@ -118,7 +118,8 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	var n notification.N
 	if sns == "misskey" {
 		//misskey migration from notification
-
+		w.WriteHeader(http.StatusOK)
+		return
 	} else {
 		err = json.Unmarshal([]byte(p.PlainText), &n)
 		if err != nil {
@@ -129,6 +130,6 @@ func PostWebPush(w http.ResponseWriter, r *http.Request) {
 	}
 
 	e := network.Expo{}
-	err = e.PushExpo(p.ExponentPushToken, n)
+	e.PushExpo(p.ExponentPushToken, n)
 	w.WriteHeader(http.StatusOK)
 }
